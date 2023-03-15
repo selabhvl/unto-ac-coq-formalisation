@@ -88,17 +88,10 @@ Notation "[ x >> y ] m" := ( device _ x y m)(in custom acnotation at level 30,
                                             y at level 99, 
                                             m custom acnotation at level 30).
 (* <{ [4 >> 6] [5 >> 9] [ > 6 ]}> *)
-(* <{ [id   value] [id   value] [default] }> *)
+
 Coercion tm_nvalue: nvalue >-> tm.
 Notation "'NvalueNat'" := (Ty_Builtin (nvalue nat)) (in custom acnotation at level 0).
 
-Definition x : string := "x".
-Definition y : string := "y".
-Definition z : string := "z".
-
-Hint Unfold x : core.
-Hint Unfold y : core.
-Hint Unfold z : core.
 
 Inductive value : tm -> Prop :=
   | v_abs : forall n x T2 t1,
@@ -140,7 +133,7 @@ Fixpoint subst (x : string) (s : tm) (t : tm) : tm :=
 where "'/' x ':=' s '/' t" := (subst x s t) (in custom acnotation).
 Hint Constructors value : core.
 
-Reserved Notation "t '-->' t'" (at level 40).
+Reserved Notation "t '-->' t'" (at level 40). 
 Inductive step : tm -> tm -> Prop :=
   | ST_AppAbs : forall n x T2 t1 v2,
          value v2 ->
@@ -159,9 +152,17 @@ Inductive step : tm -> tm -> Prop :=
   | ST_If : forall t1 t1' t2 t3,
       t1 --> t1' ->
       <{if0 t1 then t2 else t3}> --> <{if0 t1' then t2 else t3}>
-  | ST_succ: forall (n:nat) (m:nat), m = S (n) -> <{succ n}> --> <{m}>
+
+  | ST_succ: forall (n:nat) (m:nat), m = S n -> <{succ n}> --> <{m}>
+  | ST_succ_step: forall t t',  t --> t' -> <{succ t}> --> <{succ t'}>
+
   | ST_pred: forall (n:nat) (m:nat), m = Nat.pred n -> <{pred n}> --> <{m}>
+  | ST_pred_step: forall t t',  t --> t' -> <{pred t}> --> <{pred t'}>
+
   | ST_prod: forall (n:nat) (m:nat) (r:nat), r = n * m -> <{n * m}> --> <{r}>
+  | ST_prod_left: forall (n:nat) (n':nat) (m:nat), n --> n' -> <{n * m}> --> <{n' * m}>
+  | ST_prod_right: forall (n:nat) (m:nat) (m':nat), m --> m' -> <{n * m}> --> <{n * m'}>
+
   | ST_Let1: forall n t1 t1' t2, t1 --> t1' -> 
             <{val n = t1 ; t2}> --> <{val n = t1' ; t2}>
   | ST_LetValue: forall n v1 t2, value v1 -> <{val n = v1 ; t2}> --> <{ /n:=v1/t2}>
@@ -200,9 +201,21 @@ Inductive bigstep : tm -> tm -> Prop :=
     <{ /n:=(fun n [x:T2] {t1})/ /x:=v/ t1 }> ==> <{w}> ->
     <{(fun n [x:T2] {t1}) v}> ==> <{w}>
 
-  | ST_Succ: forall (n:nat) (m:nat), m = S (n) -> <{succ n}> ==> <{m}>
-  | ST_Pred: forall (n:nat) (m:nat), m = Nat.pred n -> <{pred n}> ==> <{m}>
-  | ST_Prod: forall (n:nat) (m:nat) (r:nat), r = n * m -> <{n * m}> ==> <{r}>
+  | ST_Succ: forall (n:nat) w e, 
+    w = S n ->
+    <{e}> ==> <{n}> ->
+    <{succ e}> ==> <{w}>
+
+  | ST_Pred: forall (n:nat) w e, 
+    w = Nat.pred n ->
+    <{e}> ==> <{n}> ->
+    <{pred e}> ==> <{w}>
+
+  | ST_Prod: forall n (n':nat) m (m':nat) w, 
+    w = n' * m' ->
+    <{n}> ==> <{n'}> ->
+    <{m}> ==> <{m'}> ->
+    <{n * m}> ==> <{w}>
 
   | ST_If_T: forall t1 t2 t3,
     <{t1}> ==> <{true}> ->
@@ -215,4 +228,6 @@ Inductive bigstep : tm -> tm -> Prop :=
   | ST_Refl: forall t1, <{t1}> ==> <{t1}>
 
 where "t '==>' t'" := (bigstep t t').
+
+
 
