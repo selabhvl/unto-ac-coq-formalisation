@@ -25,8 +25,15 @@ match pos , ll with
 | 0 , (nill) => empty nill
 end.
 
+Inductive value_tree_env: Type := 
+| vt_el (id:nat) (v1:value_tree) : value_tree_env -> value_tree_env
+| vt_end : value_tree_env.
 
-
+Fixpoint pi_env (pos:nat) (v_env:value_tree_env): value_tree_env :=
+match v_env with
+| (vt_end) => vt_end
+| (vt_el id vt vt_next) => vt_el id (pi pos vt) (pi_env pos vt_next)
+end.  
 
 
 
