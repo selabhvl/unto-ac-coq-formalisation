@@ -10,6 +10,7 @@ Definition y : string := "y".
 Definition z : string := "z".
 Definition n : string := "n".
 Definition fun0: string := "fun0". 
+Definition fun1: string := "fun1". 
 Definition prod5: string := "prod5". 
 
 Hint Unfold x : core.
@@ -23,69 +24,27 @@ Check <{val n = 25 ; n * 2}>.
 Check <{[4 >> 2][5 >> 5][6 >> 4][ > 5]}>.
 
 
+(*Bounded Test*)
+Compute (bounded <{fun fun0 [x:Nat] {x}}>).
 
-(*SMALL STEP SEMANTICS*)
-
-Lemma smallstep_pred_succ:forall (n:nat),<{pred (succ n)}> -->* <{n}>.
+Lemma bounded0 : bounded <{fun fun0 [x:Nat] {x}}> nil.
 Proof.
-intro n. eapply multi_step. apply ST_pred_step. apply ST_succ. auto.
-eapply multi_step. apply ST_pred. simpl. auto. apply multi_refl.
+simpl. left. reflexivity.
 Qed.
 
-(*Test of val*)
-Lemma smallstep_val: <{val n = (5*5) ; n * 2}> -->* 50.
+Lemma bounded1 : bounded <{fun fun0 [x:Nat] {x * y}}> nil.
 Proof.
-apply multi_step with (y := <{val n = 25 ; n * 2}>).
-apply ST_Let1. apply ST_prod. reflexivity.
-apply multi_step with (y := <{25*2}>).
-apply ST_LetValue. apply v_nat.
-apply multi_single. apply ST_prod. reflexivity.
-Qed.
+simpl. split.
+-left. reflexivity.
+-left.
+Abort.
 
-(*Test of fun*)
-Lemma smallstep_fun: <{fun prod5 [x:Nat] {x * 5} 5}> -->* 25.
+Lemma bounded2 : bounded <{fun fun0 [x:Nat] {x * (fun fun1 [y:Nat] {y})}}> nil.
 Proof.
-apply multi_step with (y := <{5 * 5}>).
-- apply ST_AppAbs. apply v_nat.
-- apply multi_single. apply ST_prod. reflexivity.
+simpl. split.
+-left. reflexivity.
+-left. reflexivity.
 Qed.
-
-
-(*BIG STEP SEMANTICS*)
-
-(*Test of pred succ*)
-Lemma bigstep_pred_succ:forall (i:nat), <{pred (succ i)}> ==> <{i}>.
-Proof.
-intro i.
-apply ST_Pred with (n:=(S i)).
--simpl. reflexivity.
--apply ST_Succ with (n:=i). reflexivity. apply ST_Refl.
-Qed.
-
-(*Test of val*)
-Lemma bigstep_val: <{val n = (5*5) ; n * 2}> ==> 50.
-Proof.
-apply ST_Val with (w1:=25). 
--apply ST_Prod with (n':=5)( m':=5). reflexivity. apply ST_Refl. apply ST_Refl.
--simpl. apply ST_Prod with (n':=25)( m':=2). simpl. reflexivity. apply ST_Refl. apply ST_Refl.
-Qed.
-
-(*Test of fun*)
-Lemma bigstep_fun: <{fun prod5 [x:Nat] {x * 5} 5}> ==> 25.
-Proof.
-apply ST_Fun. simpl.
-- apply v_nat.
-- simpl. apply ST_Prod with (n':=5)(m':=5). reflexivity. apply ST_Refl. apply ST_Refl.
-Qed.
-
-(*Test of fun*)
-Lemma bigstep_nv_fun: <{fun prod5 [x:Nat] {x * [>5]} ([>5])}> ==> <{[>5]*[>5]}>.
-Proof.
-apply ST_Fun. simpl.
-- apply v_nvalue.
-- simpl. apply ST_Refl.
-Qed.
-
 
 
 

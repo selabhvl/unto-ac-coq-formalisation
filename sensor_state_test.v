@@ -1,5 +1,5 @@
 Require Import sensor_state.
+Require Import expression.
 Require Import String.
 
-
-Check (s_state_el nat "el" 6 (s_state_end)).
+Check (s_state_el  "el" <{5}> (s_state_end)).
