@@ -9,10 +9,16 @@ Inductive nvalue (A:Type):Type:=
 
 
 (*get single device value*)
-Fixpoint get {A} (pos:nat)(n:nvalue A):A:=
+Fixpoint get {A} (pos:nat) (n:nvalue A):A:=
 match n with
 | default _ x => x
 | device _ i x m => if (pos=?i) then x else (get pos m)
+end.
+
+Fixpoint getDefault {A} (n:nvalue A): A :=
+match n with
+| default _ x => x
+| device _ i x m => getDefault m
 end.
 
 (*ordered predicate*)
@@ -20,6 +26,7 @@ Inductive ordered {A} :nvalue A -> Prop :=
 | ordered0 : forall x, ordered (default A x)
 | ordered1 : forall a0 b0 b1, ordered ((device A a0 b0 (default A b1)))
 | ordered2 : forall a0 a1 m b0 b1, lt a0 a1 -> ordered (device A a1 b1 m) -> ordered ((device A a0 b0 (device A a1 b1 m))).
+
 
 
 

@@ -26,7 +26,7 @@ Qed.
 (*Test of val*)
 Lemma bigstep_val: <{val n = (5*5) ; n * 2}> ==> 50.
 Proof.
-apply ST_Val with (w1:=25). 
+apply ST_Val with (w1:=25). apply v_nat. apply v_nat. 
 -apply ST_Prod with (n':=5)( m':=5). reflexivity. apply ST_Refl. apply ST_Refl.
 -simpl. apply ST_Prod with (n':=25)( m':=2). simpl. reflexivity. apply ST_Refl. apply ST_Refl.
 Qed.
@@ -36,18 +36,20 @@ Lemma bigstep_fun: <{fun prod5 [x:Nat] {x * 5} 5}> ==> 25.
 Proof.
 apply ST_Fun. simpl.
 - apply v_nat.
+- apply v_nat.
 - simpl. apply ST_Prod with (n':=5)(m':=5). reflexivity. apply ST_Refl. apply ST_Refl.
 Qed.
 
-Notation "'const' x " := (l_succ x) (in custom acnotation at level 0,
-                                     x custom acnotation at level 0).
-
 (*Test of fun*)
-Lemma bigstep_nv_fun: <{fun prod5 [x:Nat] {x * [> 5 ]} ([>5])}> ==> <{[>5]*[>5]}>.
+Lemma bigstep_nv_fun: <{fun prod5 [x:Nat] {(nv_default x) * (nv_default [> 5 ])} ([>5])}> ==> <{25}>.
 Proof.
-apply ST_Fun. simpl.
-- apply v_nvalue.
-- simpl. apply ST_Refl.
+apply ST_Fun. 
+-apply v_nvalue.
+-apply v_nat.
+- simpl. apply ST_Prod with (n':=5)( m':=5).
++ simpl. reflexivity.
++ apply ST_NvDefault with (w:=<{[>5]}>). simpl. reflexivity. apply ST_Refl.
++ apply ST_NvDefault with (w:=<{[>5]}>). simpl. reflexivity. apply ST_Refl.
 Qed.
 
 
