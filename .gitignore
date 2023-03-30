@@ -1,9 +1,11 @@
 
+/**/*.vo
+/**/*.glob
+/**/*.vok
+/**/*.vos
+/**/*.aux
 
-*.aux
-*.glob
-*.vo
-*.vok
-*.vos
+
+
 
 

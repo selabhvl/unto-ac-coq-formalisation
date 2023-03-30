@@ -1,6 +1,6 @@
 
-Require Import expression.
-Require Import small_step_semantics.
+From AC Require Import expression.
+From AC Require Import small_step_semantics.
 Require Import String.
 
 (*NOTATION*)

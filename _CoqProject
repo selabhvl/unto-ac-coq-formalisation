@@ -1,0 +1,15 @@
+lib/nvalue.v
+lib/sensor_state.v
+lib/value_tree.v
+
+agg_comp/expression.v
+agg_comp/big_step_semantics.v
+agg_comp/small_step_semantics.v
+
+test/expression_test.v
+test/big_step_semantics_test.v
+test/small_step_semantics_test.v
+test/sensor_state_test.v
+test/value_tree_test.v
+
+-R . AC

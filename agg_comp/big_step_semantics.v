@@ -1,13 +1,13 @@
-Require Import expression.
-Require Import sensor_state.
-Require Import value_tree.
-Require Import nvalue.
+From AC Require Import expression.
+From AC Require Import sensor_state.
+From AC Require Import value_tree.
+From AC Require Import nvalue.
 Require Import Bool.
 Require Import String.
 Require Import List.
 
 Variable Delta : nat.
-Variable Sigma : sensor_state.
+Variable Sigma : sensor_state exp.
 Variable VtEnvironment : value_tree_env.
 
 Reserved Notation "t '==>' t'" (at level 40).

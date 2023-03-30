@@ -1,7 +1,7 @@
 Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
-From Coq Require Import Strings.String.
+Require Import Strings.String.
 Require Import PeanoNat.
-Require Import nvalue.
+From AC Require Import nvalue.
 Require Import Bool.
 Require Import List.
 
