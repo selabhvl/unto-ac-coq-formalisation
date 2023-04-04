@@ -1,5 +1,6 @@
 
-From AC Require Import expression.
+From AC Require Import syntax.
+From AC Require Import basics.
 Require Import String.
 Require Import Lia.
 

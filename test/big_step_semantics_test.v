@@ -1,5 +1,9 @@
-From AC Require Import expression.
+From AC Require Import syntax.
 From AC Require Import big_step_semantics.
+From AC Require Import sensor_state.
+From AC Require Import value_tree.
+From AC Require Import basics.
+From AC Require Import nvalues.
 Require Import String.
 
 (*NOTATION*)
@@ -14,42 +18,12 @@ Hint Unfold x : core.
 Hint Unfold y : core.
 Hint Unfold z : core.
 
-(*Test of pred succ*)
-Lemma bigstep_pred_succ:forall (i:nat), <{pred (succ i)}> ==> <{i}>.
+Lemma multiplication: <[ 10 | base | vt_end |   <{([2>>5][>5]) * ([1>>5][>6]) }> ]> ==> <[ <{ [1>>25][2>>30][>30]}> | empty nil ]>.
 Proof.
-intro i.
-apply ST_Pred with (n:=(S i)).
--simpl. reflexivity.
--apply ST_Succ with (n:=i). reflexivity. apply ST_Refl.
+apply A_MULT.
+-split. apply ordered1. apply w_device. apply v_nat. apply w_default. apply v_nat.
+-split. apply ordered1. apply w_device. apply v_nat. apply w_default. apply v_nat.
+-split. apply ordered2. auto. apply ordered1. apply w_device. apply v_nat. apply w_device. apply v_nat. apply w_default. apply v_nat.
+-simpl. apply E_NVAL. 
+split. apply ordered2. auto. apply ordered1. apply w_device. apply v_nat. apply w_device. apply v_nat. apply w_default. apply v_nat.
 Qed.
-
-(*Test of val*)
-Lemma bigstep_val: <{val n = (5*5) ; n * 2}> ==> 50.
-Proof.
-apply ST_Val with (w1:=25). apply v_nat. apply v_nat. 
--apply ST_Prod with (n':=5)( m':=5). reflexivity. apply ST_Refl. apply ST_Refl.
--simpl. apply ST_Prod with (n':=25)( m':=2). simpl. reflexivity. apply ST_Refl. apply ST_Refl.
-Qed.
-
-(*Test of fun*)
-Lemma bigstep_fun: <{fun prod5 [x:Nat] {x * 5} 5}> ==> 25.
-Proof.
-apply ST_Fun. simpl.
-- apply v_nat.
-- apply v_nat.
-- simpl. apply ST_Prod with (n':=5)(m':=5). reflexivity. apply ST_Refl. apply ST_Refl.
-Qed.
-
-(*Test of fun*)
-Lemma bigstep_nv_fun: <{fun prod5 [x:Nat] {(nv_default x) * (nv_default [> 5 ])} ([>5])}> ==> <{25}>.
-Proof.
-apply ST_Fun. 
--apply v_nvalue.
--apply v_nat.
-- simpl. apply ST_Prod with (n':=5)( m':=5).
-+ simpl. reflexivity.
-+ apply ST_NvDefault with (w:=<{[>5]}>). simpl. reflexivity. apply ST_Refl.
-+ apply ST_NvDefault with (w:=<{[>5]}>). simpl. reflexivity. apply ST_Refl.
-Qed.
-
-

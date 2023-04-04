@@ -1,15 +1,19 @@
-
+From AC Require Import syntax.
 Require Import String.
+Require Import Bool.
 
-Inductive sensor_state (A:Type): Type := 
-| s_state_el (n:string) (v:A) : sensor_state A -> sensor_state A
-| s_state_end : sensor_state A.
+Definition sensor_state := string -> nvalue.
 
-(*
-Fixpoint charge_sensor_state (s:sensor_state A) (e:A) : A :=
-match s with
-| s_state_el n v l=> charge_sensor_state l (<{/n := v/ e}>)
-| s_state_end => e
-end. 
-*)
+Definition getSens (n:string) (s:sensor_state) : nvalue := s n.
 
+
+Definition base (s:string) := default l_fail.
+
+
+Definition contains (s:string) (old:string->nvalue): bool :=
+match (old s) with 
+| default l_fail => false
+| _ => true
+end.
+
+Definition add (s:string) (v:nvalue) (old:string->nvalue): (string->nvalue) :=(fun x => if String.eqb x s then v else (old x)).

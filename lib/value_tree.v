@@ -1,16 +1,16 @@
+From AC Require Import syntax.
 Require Import String. 
-From AC Require Import nvalue. 
 Require Import PeanoNat. 
 Require Import List. 
 
 Inductive value_tree: Type :=
 | empty : list value_tree -> value_tree
-| some (B:Type) (A:nvalue B): list value_tree  -> value_tree.
+| some : nvalue -> list value_tree  -> value_tree.
 
 Definition extract_l (v:value_tree) : list value_tree:= 
 match v with 
 | empty l => l
-| some _ _ l => l
+| some _ l => l
 end.
 
 (*return empty value_tree if pos dowsn't exists*)

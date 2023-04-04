@@ -1,33 +1,34 @@
 
 Require Import String. 
-From AC Require Import nvalue. 
+From AC Require Import syntax.
+From AC Require Import nvalues. 
 From AC Require Import value_tree.
 Require Import Bool.
 
-Check (some nat (default nat 5) (cons (some bool (default bool true) nil) nil)).
+Check (some (default 5) (cons (some (default <{true}> ) nil) nil)).
 
 (*Returns first value tree in the list*)
-Compute (pi 0 (empty (cons (some bool (default bool true) nil) (cons (some bool (default bool false) nil) 
-(cons (some nat (default nat 5) nil) nil))))).
+Compute (pi 0 (empty (cons (some (default <{true}> ) nil) (cons (some (default <{false}> ) nil) 
+(cons (some (default 5) nil) nil))))).
 
 (*Returns second value tree in the list*)
-Compute (pi 1 (empty (cons (some bool (default bool true) nil) (cons (some bool (default bool false) nil) 
-(cons (some nat (default nat 5) nil) nil))))).
+Compute (pi 1 (empty (cons (some (default <{true}>) nil) (cons (some (default <{false}>) nil) 
+(cons (some (default 5) nil) nil))))).
 
 (*Returns third value tree in the list*)
-Compute (pi 2 (empty (cons (some bool (default bool true) nil) (cons (some bool (default bool false) nil) 
-(cons (some nat (default nat 5) nil) nil))))).
+Compute (pi 2 (empty (cons (some (default <{true}>) nil) (cons (some (default <{false}>) nil) 
+(cons (some (default 5) nil) nil))))).
 
 (*Returns empty value tree*)
-Compute (pi 3 (empty (cons (some bool (default bool true) nil) (cons (some bool (default bool false) nil) 
-(cons (some nat (default nat 5) nil) nil))))).
+Compute (pi 3 (empty (cons (some (default <{true}>) nil) (cons (some (default <{false}>) nil) 
+(cons (some (default 5) nil) nil))))).
 
 
-Definition vt_0: value_tree := empty (cons (some bool (default bool true) nil) (cons (some bool (default bool false) nil) 
-(cons (some nat (default nat 5) nil) nil))).
+Definition vt_0: value_tree := empty (cons (some (default <{true}>) nil) (cons (some (default <{false}>) nil) 
+(cons (some (default 5) nil) nil))).
 
-Definition vt_1: value_tree := empty (cons (some bool (default bool false) nil) (cons (some bool (default bool true) nil) 
-(cons (some nat (default nat 6) nil) nil))).
+Definition vt_1: value_tree := empty (cons (some (default <{false}>) nil) (cons (some (default <{true}>) nil) 
+(cons (some (default 6) nil) nil))).
 
 (*VALUE-TREE ENV*)
 
