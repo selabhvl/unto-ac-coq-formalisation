@@ -52,12 +52,12 @@ Qed.
 
 Lemma test4 : bounded <{[0 >> (fun fun0 [x:Nat] {x*y})][>5]}> nil.
 Proof.
-simpl. split. split. auto. right.
+simpl. split. split. auto. 
 Abort.
 
 Lemma test4 : bounded <{nfold [0 >> (fun fun0 [x:Nat] {x*y})][>5] [>6] [>([>1] * [>(fun fun0 [x:Nat] {y})])] }> nil.
 Proof.
-simpl. split. split. split. auto. right.
+simpl. split. split. split. auto. 
 Abort.
 
 Lemma w_test0 : w_value <{[>3]}>.

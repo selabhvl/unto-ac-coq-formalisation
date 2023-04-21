@@ -41,8 +41,8 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
             x (w1:nvalue) (w2:nvalue) e1 e2 (theta1:value_tree) (theta2:value_tree), 
             w_value w1 ->
             w_value w2 ->
-            <[ id | sigma | pi_env 1 env (*TO CHANGE*)| <{e1}> ]> ==> <[ <{w1}> | theta1 ]> ->
-            <[ id | sigma | pi_env 2 env (*TO CHANGE*)| <{/x := w1/ e2 }> ]>  ==> <[ <{w2}> | theta2 ]> ->
+            <[ id | sigma | pi_env 0 env | <{e1}> ]> ==> <[ <{w1}> | theta1 ]> ->
+            <[ id | sigma | pi_env 1 env | <{/x := w1/ e2 }> ]>  ==> <[ <{w2}> | theta2 ]> ->
             <[ id | sigma | env | <{val x = e1 ; e2}> ]>  ==> <[ <{w2}> | empty (cons theta1 (cons theta2 nil)) ]> 
 
   | E_APP : forall (id:ident) (sigma:sensor_state) (env:value_tree_env) 
@@ -52,9 +52,9 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
             w_value w2 ->
             f = (nvalues.get id w0 ) ->
             is_fun f ->
-            <[ id | sigma | env (*TO CHANGE*) | <{e0}> ]> ==> <[ <{w0}> | theta0 ]> ->
-            <[ id | sigma | env (*TO CHANGE*) | <{e1}> ]> ==> <[ <{w1}> | theta1 ]> ->
-            <[ id | sigma | env (*TO CHANGE*)  | <{f w1}> ]> ==> <[ <{w2}> | theta2 ]> ->
+            <[ id | sigma | pi_env 0 env  | <{e0}> ]> ==> <[ <{w0}> | theta0 ]> ->
+            <[ id | sigma | pi_env 1 env  | <{e1}> ]> ==> <[ <{w1}> | theta1 ]> ->
+            <[ id | sigma | pi_env 2 (select_f env f)  | <{f w1}> ]> ==> <[ <{w2}> | theta2 ]> ->
             <[ id | sigma | env | <{e0 e1}> ]> ==> <[ <{w2}> | some <{[>f]}> (cons theta0 (cons theta1 (cons theta2 nil))) ]>  
 
   | A_FUN : forall (id:ident) (sigma:sensor_state) (env:value_tree_env) (theta:value_tree)
@@ -83,68 +83,55 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
             w_value w2 ->
             <[ id | sigma | env | (pointWise l_prod w0 w1) ]> ==> <[ <{w2}> | empty nil ]> ->
             <[ id | sigma | env | <{w0 * w1}> ]>  ==> <[ <{w2}> | empty nil ]> 
-
-  (*An implentation of point-wise without FAIL inside nvalue is possible:
-      1) extend both w1 w2 with extend function
-      2) create a function inside A_PROD that match on w0 w1 w2 and return recursively for
-         each position of nvalue or False or (if all locals are natural numbers with same position) 
-         l0*l1=l3 /\ (recorsive call) *)
-
-
-
-(*
-
-  (*Simplest way, but with FAIL in nvalue literals*)
-  | A_MULT : forall e0 e1 (w0:nvalue) (w1:nvalue)  (w2:nvalue) ,
-      w_value w0 ->
-      w_value w1 ->
-      w_value w2 ->
-      <{e0}> ==> <{w0}> ->
-      <{e1}> ==> <{w1}> ->
-      pointWise l_prod w0 w1 ==> <{w2}> ->
-      <{e0 * e1}> ==> <{w2}>
-
-  | A_FOLD : forall (l:literal) (w0:nvalue) (w1:nvalue) (w2:nvalue) ,
-      w_value w0 ->
-      w_value w1 -> 
-      w_value w2 -> 
-      value l ->
-      (*TO DO*) 
-      <{nfold w0 w1 w2}> ==> <{[>l]}>  
-*)   
-
   
-(*
+  (*Non-recursive nfold*)
+  | A_FOLD : forall (id:ident) (sigma:sensor_state) (env:value_tree_env) (w1:nvalue) (w2:nvalue) (w3:nvalue) (l:literal) (theta:value_tree),
+            w_value w1 ->
+            w_value w2 ->
+            w_value w3 ->
+            value l ->
+            <[ id | sigma | vt_end | folding id (rev (devices env)) w1 w2 w3 ]> ==> <[ <{[>l]}> | theta ]>   ->
+            <[ id | sigma | env | <{nfold w1 w2 w3}> ]>  ==> <[ <{[>l]}> | empty nil ]> 
 
-  | ST_Succ: forall (n:nat) w e, 
-    w = S n ->
-    <{e}> ==> <{n}> ->
-    <{succ e}> ==> <{w}>
-  | ST_Pred: forall (n:nat) w e, 
-    w = Nat.pred n ->
-    <{e}> ==> <{n}> ->
-    <{pred e}> ==> <{w}>
-  | ST_Prod: forall n (n':nat) m (m':nat) w, 
-    w = n' * m' ->
-    <{n}> ==> <{n'}> ->
-    <{m}> ==> <{m'}> ->
-    <{n * m}> ==> <{w}>
-  | ST_If_T: forall t1 t2 t3,
-    <{t1}> ==> <{true}> ->
-    <{if t1 then t2 else t3}> ==> <{t2}>
-  | ST_If_F: forall t1 t2 t3,
-    <{t1}> ==> <{false}> ->
-    <{if t1 then t2 else t3}> ==> <{t3}>
-  | ST_Refl: forall t1, <{t1}> ==> <{t1}> *
-  | ST_NvGet: forall (n:nat) (w:nvalue literal) e1 e2 (l:literal), 
-    l = nvalue.get n w ->
-    <{e1}> ==> <{n}> -> 
-    <{e2}> ==> <{w}> ->
-    <{nv_get e1 e2}> ==> <{l}>
-  | ST_NvDefault: forall e1 (l:literal) (w: nvalue literal), *
-    l = nvalue.getDefault w ->
-    <{e1}> ==> <{w}> ->
-    <{nv_default e1}> ==> <{l}> *)
+  (*Recursive nfold*)
+  | A_FOLD_B : forall (id:ident) (pos:ident) (sigma:sensor_state) (vt:value_tree) (w1:nvalue) (w2:nvalue) (w3:nvalue) (l:literal) (theta:value_tree) ,
+            pos<>id ->
+            w_value w1 ->
+            w_value w2 ->
+            w_value w3 ->
+            value l ->
+            <[ id | sigma | vt_end | exp_app (exp_app w1 (nvalues.get pos w2)) w3 ]> ==> <[ <{[>l]}> | theta ]>   ->  
+            <[ id | sigma | vt_el pos vt vt_end | <{nfold w1 w2 w3}> ]>  ==> <[ <{[>l]}> | empty nil ]> 
+
+ 
+  | A_FOLD_R :forall (id:ident) (pos:ident) (sigma:sensor_state) (vt:value_tree) (els:value_tree_env) (w1:nvalue) (w2:nvalue) (w3:nvalue) (l:literal) (l0:literal) (theta:value_tree) ,
+            pos<>id ->            
+            w_value w1 ->
+            w_value w2 ->
+            w_value w3 ->
+            value l0 -> 
+            value l ->
+            <[ id | sigma | vt_end | exp_app (exp_app w1 (nvalues.get pos w2)) w3 ]> ==> <[ <{[>l0]}> | theta ]>   ->  
+            <[ id | sigma | els | <{nfold w1 w2 [>l0]}> ]> ==> <[ <{[>l]}> | empty nil ]>   ->  
+            <[ id | sigma | vt_el pos vt els | <{nfold w1 w2 w3}> ]>  ==> <[ <{[>l]}> | empty nil ]> 
+
+  | A_FOLD_J : forall (id:ident) (sigma:sensor_state) (vt:value_tree) (els:value_tree_env) (w1:nvalue) (w2:nvalue) (w3:nvalue) (l:literal) (l0:literal) (theta:value_tree) ,
+            w_value w1 ->
+            w_value w2 ->
+            w_value w3 ->
+            value l ->
+            <[ id | sigma | els | <{nfold w1 w2 w3}> ]> ==> <[ <{[>l]}> | empty nil ]>   ->  
+            <[ id | sigma | vt_el id vt els | <{nfold w1 w2 w3}> ]>  ==> <[ <{[>l]}> | empty nil ]> 
+
+  | A_EXCHANGE : forall (id:ident) (sigma:sensor_state) (env:value_tree_env) (theta:value_tree)
+                 (w_i:nvalue) (w_f:nvalue) (w_r:nvalue),
+            w_value w_i -> 
+            w_value w_f ->
+            w_value w_r ->
+            <[ id | sigma | pi_env 0 env  | exp_app w_f (get_messages id w_i env) ]> ==> <[ <{w_r}> | theta ]> ->
+            <[ id | sigma | env | <{exchange w_i w_f}> ]>  ==> <[ <{w_r}> | some w_r (cons theta nil) ]> 
+
+
 where "t '==>' t'" := (bigstep t t').
 
 

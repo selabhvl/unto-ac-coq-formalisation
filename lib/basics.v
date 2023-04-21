@@ -16,11 +16,9 @@ Fixpoint subst (x : string) (s : exp) (t : exp) : exp :=
   | <{t1 t2}> =>
       <{(/x:=s/ t1) (/x:=s/ t2)}>
   | <{val n = t1 ; t2}> =>
-      if (String.eqb x n) then t else <{val n = (/x:=s/ t1) ; (/x:=s/ t2)}>
-  | <{if t1 then t2 else t3}> =>
-        <{if (/x:=s/ t1) then (/x:=s/ t2) else (/x:=s/ t3)}>
-  | exp_nvalue nv =>
-    <{nv}>
+      if (String.eqb x n) then t else <{val n = (/x:=s/ t1) (*Dentro n non si può sostituire ?*) ; (/x:=s/ t2)}>
+  | exp_nvalue w =>
+    <{w}>
   | <{true}> =>
       <{true}>
   | <{false}> =>
@@ -31,79 +29,20 @@ Fixpoint subst (x : string) (s : exp) (t : exp) : exp :=
     <{succ (/x:=s/ t1)}>
   | l_pred t1 =>
     <{pred (/x:=s/ t1)}>
-  | l_mult t1 t2 =>
-    <{(/x:=s/ t1) * (/x:=s/ t2)}>
-  | l_nvalue_get t1 t2 =>
-      <{nv_get t1 t2}> 
-  | l_nvalue_getDefault t1 =>
-      <{nv_default t1}> 
+  | l_mult w0 w1 =>
+    <{w0 * w1}>
   | l_uid => 
       l_uid
-  | l_self e0 =>
-      <{self e0 }> 
+  | l_self w0 =>
+      <{self w0 }> 
   | l_sensor s =>
       l_sensor s
   | l_fail => l_fail
-  | l_nfold e0 e1 e2 => l_nfold e0 e1 e2
+  | l_nfold w0 w1 w2 => l_nfold <{/x:=s/ w0}> <{/x:=s/w1}> <{/x:=s/w2}>
+  | l_exchange w0 w1 => l_exchange <{/x:=s/w0}> <{/x:=s/w1}>
 end
 where "'/' x ':=' s '/' t" := (subst x s t) (in custom acnotation).
 
-(*
-(*Recursive on nvalues*)
-Reserved Notation "'/' x ':=' s '/' t" (in custom acnotation at level 20, x constr).
-Fixpoint subst (x : string) (s : exp) (t : exp) : exp := 
-let l_s := 
-  (fix l_s (l : literal) : literal := 
-        match l with
-          | l_uid => 
-            l_uid
-          | l_self e0 =>
-            <{self (/x:=s/ e0) }> 
-          | l_sensor s =>
-            l_sensor s
-          | l_fail => l_fail
-          | <{true}> =>
-              <{true}>
-          | <{false}> =>
-              <{false}>
-          | l_const n =>
-            <{n}>
-          | l_succ t1 =>
-            <{succ (/x:=s/ t1)}>
-          | l_pred t1 =>
-            <{pred (/x:=s/ t1)}>
-          | l_mult t1 t2 =>
-            <{(/x:=s/ t1) * (/x:=s/ t2)}>
-          | l_nvalue_get t1 t2 =>
-              <{nv_get (/x:=s/ t1) (/x:=s/ t2)}> 
-          | l_nvalue_getDefault t1 =>
-              <{nv_default (/x:=s/ t1)}> 
-          | <{fun n [y:T] {t1}}> =>
-            if ((String.eqb x y) || (String.eqb x n)) then l else <{fun n [y:T] {/x:=s/ t1}}>
-          | l_nfold e0 e1 e2 =>
-            <{nfold (/x:=s/ e0) (/x:=s/ e1) (/x:=s/ e2)}>
-        end)
-in
-  match t with
-  | exp_var y =>
-      if String.eqb x y then s else t
-    | <{t1 t2}> =>
-      <{(/x:=s/ t1) (/x:=s/ t2)}>
-  | <{val n = t1 ; t2}> =>
-      if (String.eqb x n) then t else <{val n = (/x:=s/ t1) ; (/x:=s/ t2)}>
-  | <{if t1 then t2 else t3}> =>
-        <{if (/x:=s/ t1) then (/x:=s/ t2) else (/x:=s/ t3)}>
-  | exp_nvalue nv =>
-    (fix w_rec (w : nvalue) : nvalue := 
-    match w with
-      | default l => default (l_s l)
-      | device n l wl => device n (l_s l) (w_rec wl)
-    end) nv
-  | exp_literal l =>
-      l_s l
-  end
-where "'/' x ':=' s '/' t" := (subst x s t) (in custom acnotation).
-*)
 
 (*Recursive on nvalues*)
 Fixpoint bounded (e:exp) (l_bounded:list string) {struct e}: Prop :=
@@ -112,8 +51,8 @@ let l_b :=
         match l with
         | l_uid =>
           True
-        | l_self e0 => 
-           bounded e0 nil
+        | l_self w0 => 
+          bounded w0 nil
         | l_sensor s => 
             True
         | l_fail => False
@@ -127,16 +66,14 @@ let l_b :=
           (bounded t1 l_bounded)
         | l_pred t1 =>
           (bounded t1 l_bounded)
-        | l_mult t1 t2 =>
-          (bounded t1 l_bounded) /\ (bounded t2 l_bounded)
-        | l_nvalue_get t1 t2 =>
-            (bounded t1 l_bounded) /\ (bounded t2 l_bounded)
-        | l_nvalue_getDefault t1 =>
-        (bounded t1 l_bounded)
+        | l_mult w1 w2 =>
+            bounded w1 nil /\ bounded w2 nil
         | <{fun n [y:T] {t1}}> =>
             bounded t1 (cons y l_bounded)
-        | l_nfold e0 e1 e2 => 
-            (bounded e0 nil) /\ (bounded e1 nil) /\ (bounded e2 nil) 
+        | l_nfold w0 w1 w2 => 
+            bounded w0 nil /\ bounded w1 nil /\ bounded w2 nil 
+        | l_exchange w0 w1=> 
+            bounded w0 nil /\ bounded w1 nil 
         end
     )
 in
@@ -149,9 +86,6 @@ match e with
     (bounded t1 l_bounded) /\ (bounded t1 l_bounded)
   | <{val n = t1 ; t2}> =>
     (bounded t1 l_bounded) /\ (bounded t2 (cons n l_bounded))
-  | <{if t1 then t2 else t3}> =>
-    (bounded t1 l_bounded) /\ (bounded t2 l_bounded)
-    /\ (bounded t3 l_bounded)
   | exp_nvalue w =>
     (fix w_rec (w : nvalue ) : Prop := 
     match w with

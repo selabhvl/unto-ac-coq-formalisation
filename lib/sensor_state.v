@@ -9,7 +9,6 @@ Definition getSens (n:string) (s:sensor_state) : nvalue := s n.
 
 Definition base (s:string) := default l_fail.
 
-
 Definition contains (s:string) (old:string->nvalue): bool :=
 match (old s) with 
 | default l_fail => false
