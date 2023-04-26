@@ -82,9 +82,8 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
             w_value w1 ->
             w_value w2 ->
             <[ id | sigma | env | (pointWise l_prod w0 w1) ]> ==> <[ <{w2}> | empty nil ]> ->
-            <[ id | sigma | env | <{w0 * w1}> ]>  ==> <[ <{w2}> | empty nil ]> 
+            <[ id | sigma | env | <{mult w0 w1}> ]>  ==> <[ <{w2}> | empty nil ]> 
   
-  (*Non-recursive nfold*)
   | A_FOLD : forall (id:ident) (sigma:sensor_state) (env:value_tree_env) (w1:nvalue) (w2:nvalue) (w3:nvalue) (l:literal) (theta:value_tree),
             w_value w1 ->
             w_value w2 ->
@@ -93,36 +92,6 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
             <[ id | sigma | vt_end | folding id (rev (devices env)) w1 w2 w3 ]> ==> <[ <{[>l]}> | theta ]>   ->
             <[ id | sigma | env | <{nfold w1 w2 w3}> ]>  ==> <[ <{[>l]}> | empty nil ]> 
 
-  (*Recursive nfold*)
-  | A_FOLD_B : forall (id:ident) (pos:ident) (sigma:sensor_state) (vt:value_tree) (w1:nvalue) (w2:nvalue) (w3:nvalue) (l:literal) (theta:value_tree) ,
-            pos<>id ->
-            w_value w1 ->
-            w_value w2 ->
-            w_value w3 ->
-            value l ->
-            <[ id | sigma | vt_end | exp_app (exp_app w1 (nvalues.get pos w2)) w3 ]> ==> <[ <{[>l]}> | theta ]>   ->  
-            <[ id | sigma | vt_el pos vt vt_end | <{nfold w1 w2 w3}> ]>  ==> <[ <{[>l]}> | empty nil ]> 
-
- 
-  | A_FOLD_R :forall (id:ident) (pos:ident) (sigma:sensor_state) (vt:value_tree) (els:value_tree_env) (w1:nvalue) (w2:nvalue) (w3:nvalue) (l:literal) (l0:literal) (theta:value_tree) ,
-            pos<>id ->            
-            w_value w1 ->
-            w_value w2 ->
-            w_value w3 ->
-            value l0 -> 
-            value l ->
-            <[ id | sigma | vt_end | exp_app (exp_app w1 (nvalues.get pos w2)) w3 ]> ==> <[ <{[>l0]}> | theta ]>   ->  
-            <[ id | sigma | els | <{nfold w1 w2 [>l0]}> ]> ==> <[ <{[>l]}> | empty nil ]>   ->  
-            <[ id | sigma | vt_el pos vt els | <{nfold w1 w2 w3}> ]>  ==> <[ <{[>l]}> | empty nil ]> 
-
-  | A_FOLD_J : forall (id:ident) (sigma:sensor_state) (vt:value_tree) (els:value_tree_env) (w1:nvalue) (w2:nvalue) (w3:nvalue) (l:literal) (l0:literal) (theta:value_tree) ,
-            w_value w1 ->
-            w_value w2 ->
-            w_value w3 ->
-            value l ->
-            <[ id | sigma | els | <{nfold w1 w2 w3}> ]> ==> <[ <{[>l]}> | empty nil ]>   ->  
-            <[ id | sigma | vt_el id vt els | <{nfold w1 w2 w3}> ]>  ==> <[ <{[>l]}> | empty nil ]> 
-
   | A_EXCHANGE : forall (id:ident) (sigma:sensor_state) (env:value_tree_env) (theta:value_tree)
                  (w_i:nvalue) (w_f:nvalue) (w_r:nvalue),
             w_value w_i -> 
@@ -130,7 +99,6 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
             w_value w_r ->
             <[ id | sigma | pi_env 0 env  | exp_app w_f (get_messages id w_i env) ]> ==> <[ <{w_r}> | theta ]> ->
             <[ id | sigma | env | <{exchange w_i w_f}> ]>  ==> <[ <{w_r}> | some w_r (cons theta nil) ]> 
-
 
 where "t '==>' t'" := (bigstep t t').
 

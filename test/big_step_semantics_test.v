@@ -18,81 +18,79 @@ Hint Unfold x : core.
 Hint Unfold y : core.
 Hint Unfold z : core.
 
-Lemma multiplication: <[ 10 | base | vt_end |   <{([2>>5][>5]) * ([1>>5][>6]) }> ]> ==> <[ <{ [1>>25][2>>30][>30]}> | empty nil ]>.
+Lemma multiplication: <[ 10 | base | vt_end |   <{mult ([2>>5][>5]) ([1>>5][>6]) }> ]> ==> <[ <{ [1>>25][2>>30][>30]}> | empty nil ]>.
 Proof.
 apply A_MULT.
--split. apply ordered1. apply w_device. apply v_nat. apply w_default. apply v_nat.
--split. apply ordered1. apply w_device. apply v_nat. apply w_default. apply v_nat.
--split. apply ordered2. auto. apply ordered1. apply w_device. apply v_nat. apply w_device. apply v_nat. apply w_default. apply v_nat.
+-split. apply ordered1. simpl. auto.
+-split. apply ordered1. simpl. auto.
+-split. apply ordered2. auto. apply ordered1. simpl. auto.
 -simpl. apply E_NVAL. 
-split. apply ordered2. auto. apply ordered1. apply w_device. apply v_nat. apply w_device. apply v_nat. apply w_default. apply v_nat.
+split. apply ordered2. auto. apply ordered1. simpl. auto.
 Qed.
 
-Lemma fold00: <[ 4 | base | vt_el 2 (empty nil) (vt_el 3 (empty nil) (vt_end)) | <{ nfold [> fun fun0[x:Nat] {fun fun0[y:Nat] {x*y} }] [2>>4][3>>5][>6] [>7] }> ]> ==> <[ <{[>140]}> | empty nil ]>.
+Lemma fold00: <[ 4 | base | vt_el 2 (empty nil) (vt_el 3 (empty nil) (vt_end)) | <{ nfold ([> fun fun0[x:Nat] {fun fun0[y:Nat] {mult x y} }]) ([2>>4][3>>5][>6]) ([>7]) }> ]> ==> <[ <{[>140]}> | empty nil ]>.
 Proof.
 eapply A_FOLD.
 -split. 
 + apply ordered0.
-+ apply w_default. apply v_abs. simpl. split. right. left. reflexivity. left. reflexivity.
++ simpl. auto.
 -split. 
 +apply ordered2. auto. apply ordered1.
-+ apply w_device. apply v_nat. apply w_device. apply v_nat. apply w_default. apply v_nat.
++ simpl. auto.
 -split. 
 + apply ordered0.
-+ apply w_default. apply v_nat.
-- apply v_nat.
-- simpl. apply E_APP with (w0:=<{[> fun fun0 [y : Nat] { [>5] * y}]}>) (w1:=<{[>28]}>).
-+ split. apply ordered0. apply w_default. apply v_abs. simpl. auto.
-+ split. apply ordered0. apply w_default. apply v_nat.
-+ split. apply ordered0. apply w_default. apply v_nat.
++ simpl. auto.
+- unfold value. simpl. auto.
+- simpl. apply E_APP with (w0:=<{[> fun fun0 [y : Nat] {mult ([>5]) y}]}>) (w1:=<{[>28]}>).
++ split. apply ordered0. simpl. auto.
++ split. apply ordered0. simpl. auto.
++ split. apply ordered0. simpl. auto.
 + simpl. auto. 
 + apply func.
 
-+ apply E_APP with (w0:=<{[ > fun fun0 [x : Nat] {fun fun0 [y : Nat] {x * y}}]}>) (w1:=<{[>5]}>).
-split. apply ordered0. apply w_default. apply v_abs. simpl. split. right. left. reflexivity. left. reflexivity.
-split. apply ordered0. apply w_default. apply v_nat. 
-split. apply ordered0. apply w_default. apply v_abs. simpl. auto. 
++ apply E_APP with (w0:=<{[ > fun fun0 [x : Nat] {fun fun0 [y : Nat] {mult x y}}]}>) (w1:=<{[>5]}>).
+split. apply ordered0. simpl. auto.
+split. apply ordered0. simpl. auto.
+split. apply ordered0. simpl. auto.
 simpl. auto. apply func. 
 apply E_NVAL.
-split. apply ordered0. apply w_default. apply v_abs. simpl. split. right. left. reflexivity. left. reflexivity.
-apply E_LIT. apply v_nat. 
-apply A_FUN. split. apply ordered0. apply w_default. apply v_nat. split. apply ordered0. apply w_default. apply v_abs. simpl. auto.
-simpl. apply E_LIT.  apply v_abs. simpl. auto.
+split. apply ordered0. simpl. auto.
+apply E_LIT. unfold value. simpl. auto.
+apply A_FUN. split. apply ordered0. simpl. auto. split.  apply ordered0. simpl. auto. 
+simpl. apply E_LIT.  unfold value. simpl. auto.
 
-+ apply E_APP with (w0:=<{[ > fun fun0 [y : Nat] {[>4] * y}]}>) (w1:=<{[>7]}>).
-split. apply ordered0. apply w_default. apply v_abs. simpl. auto.
-split. apply ordered0. apply w_default. apply v_nat.
-split. apply ordered0. apply w_default. apply v_nat.
++ apply E_APP with (w0:=<{[ > fun fun0 [y : Nat] {mult ([>4]) y}]}>) (w1:=<{[>7]}>).
+split. apply ordered0. simpl. auto.
+split. apply ordered0. simpl. auto.
+split. apply ordered0. simpl. auto.
 simpl. auto. apply func. 
-apply E_APP with (w0:=<{[ > fun fun0 [x : Nat] {fun fun0 [y : Nat] {x * y}}]}>) (w1:=<{[>4]}>).
-split. apply ordered0. apply w_default. apply v_abs. simpl. split. right. left. reflexivity. left. reflexivity.
-split. apply ordered0. apply w_default. apply v_nat.
-split. apply ordered0. apply w_default. apply v_abs. simpl. auto.
+apply E_APP with (w0:=<{[ > fun fun0 [x : Nat] {fun fun0 [y : Nat] {mult x y}}]}>) (w1:=<{[>4]}>).
+split. apply ordered0. simpl. auto.
+split. apply ordered0. simpl. auto.
+split. apply ordered0. simpl. auto.
 simpl. auto. apply func. apply E_NVAL. 
-split. apply ordered0. apply w_default. apply v_abs. simpl. split. right. left. reflexivity. left. reflexivity.
-apply E_LIT. apply v_nat. apply A_FUN. split. apply ordered0. apply w_default. apply v_nat.
-split. apply ordered0. apply w_default. apply v_abs. simpl. auto. simpl. 
-apply E_LIT. apply v_abs. simpl. auto. 
-apply E_LIT. apply v_nat.
-apply A_FUN. split. apply ordered0. apply w_default. apply v_nat.
-split. apply ordered0. apply w_default. apply v_nat.
+split. apply ordered0. simpl. auto.
+apply E_LIT. unfold value. simpl. auto. apply A_FUN. split. apply ordered0. simpl. auto.
+split. apply ordered0. simpl. auto.
+apply E_LIT. unfold value. simpl. auto.
+apply E_LIT. unfold value. simpl. auto.
+apply A_FUN. split. apply ordered0. simpl. auto.
+split. apply ordered0. simpl. auto.
 simpl. apply A_MULT. 
-split. apply ordered0. apply w_default. apply v_nat.
-split. apply ordered0. apply w_default. apply v_nat.
-split. apply ordered0. apply w_default. apply v_nat.
-simpl. apply E_NVAL. split. apply ordered0. apply w_default. apply v_nat.
-
-+apply A_FUN. split. apply ordered0. apply w_default. apply v_nat.
-split. apply ordered0. apply w_default. apply v_nat.
+split. apply ordered0. simpl. auto.
+split. apply ordered0. simpl. auto.
+split. apply ordered0. simpl. auto.
+simpl. apply E_NVAL. split. apply ordered0. simpl. auto.
++apply A_FUN. split. apply ordered0. simpl. auto.
+split. apply ordered0. simpl. auto.
 simpl. apply A_MULT.  
-split. apply ordered0. apply w_default. apply v_nat.
-split. apply ordered0. apply w_default. apply v_nat.
-split. apply ordered0. apply w_default. apply v_nat.
-simpl. apply E_NVAL. split. apply ordered0. apply w_default. apply v_nat.
-
+split. apply ordered0. simpl. auto.
+split. apply ordered0. simpl. auto.
+split. apply ordered0. simpl. auto.
+simpl. apply E_NVAL. split. apply ordered0. simpl. auto.
 Qed.
 
-
+(*
 Lemma fold00_R: <[ 4 | base | vt_el 2 (empty nil) (vt_el 3 (empty nil) (vt_end)) | <{ nfold [> fun fun0[x:Nat] {fun fun0[y:Nat] {x*y} }] [2>>4][3>>5][>6] [>7] }> ]> ==> <[ <{[>140]}> | empty nil ]>.
 Proof. 
 (*C0 call*)
@@ -181,4 +179,4 @@ split. apply ordered0. apply w_default. apply v_nat.
 split. apply ordered0. apply w_default. apply v_nat.
 split. apply ordered0. apply w_default. apply v_nat.
 simpl. apply E_NVAL.  split. apply ordered0. apply w_default. apply v_nat.
-
+*)
