@@ -41,7 +41,7 @@ eapply A_FOLD.
 + apply ordered0.
 + simpl. auto.
 - unfold value. simpl. auto.
-- simpl. apply E_APP with (w0:=<{[> fun fun0 [y : Nat] {mult ([>5]) y}]}>) (w1:=<{[>28]}>).
+- simpl. eapply E_APP with (w0:=<{[> fun fun0 [y : Nat] {mult ([>5]) y}]}>) (w1:=<{[>28]}>).
 + split. apply ordered0. simpl. auto.
 + split. apply ordered0. simpl. auto.
 + split. apply ordered0. simpl. auto.

@@ -34,11 +34,31 @@ match goal with
 | _ => nval_tac
 end].
 
+Ltac fun_tac := apply A_FUN; [>w_tac|w_tac|simpl].
+
+Ltac sens_tac := 
+apply A_SENS;
+[>w_tac|
+unfold base; repeat (unfold add); simpl;
+lazymatch goal with 
+| [|- context [l_fail]]=> fail
+| _ => reflexivity
+end].
+
+Ltac self_tac := apply A_SELF; [>w_tac|reflexivity].
+
+Ltac uid_tac := apply A_UID.
+
+Ltac app_tac x y:= apply E_APP with (w0:=x) (w1:=y); [>w_tac|w_tac|w_tac|simpl;auto|apply func|idtac "TO SOLVE E1"|idtac "TO SOLVE E2"|idtac "TO SOLVE FUN"].
+
+Ltac nfold_tac := eapply A_FOLD;[>w_tac|w_tac|w_tac|unfold value;simpl;auto|simpl].
 
 
 Definition x:string := "x".
 Definition y:string := "y".
 Definition z:string := "z".
+Definition s0:string := "s0".
+Definition s1:string := "s1".
 Definition fun0:string := "fun0".
 
 Lemma mult: <[ 10 | base | vt_end |   <{mult ([1>>5][2>>5][>5]) ([1>>5][>6]) }> ]> ==> <[ <{ [1>>25][2>>30][>30]}> | empty nil ]>.
@@ -71,7 +91,61 @@ Proof.
 try var_tac.
 Abort.
 
+Lemma func: <[10 | base | vt_end | <{fun fun0[x:Nat]{mult x ([>5])} ([>6])}> ]> ==> <[ <{[>30]}> | empty nil  ]>.
+Proof.
+fun_tac. mult_tac.
+Qed.
 
+Lemma wrong_func: <[10 | base | vt_end | <{fun fun0[x:Nat]{mult x ([>5])} ([>6])}> ]> ==> <[ <{[>25]}> | empty nil  ]>.
+Proof.
+try (fun_tac; mult_tac).
+Abort.
 
+Lemma sens: <[10 | add s0 <{[>5]}> (add s1 <{[>6]}> base) | vt_end | <{sensor s0}> ]> ==> <[ <{[>5]}> | empty nil  ]>.
+Proof.
+sens_tac.
+Qed.
 
+Lemma wrong_sens: <[10 | add s0 <{[>5]}> (add s1 <{[>6]}> base) | vt_end | <{sensor z}> ]> ==> <[ <{[>FAIL]}> | empty nil  ]>.
+Proof.
+try sens_tac.
+Abort.
+
+Lemma self: <[10 | base | vt_end | <{self ([10>>5][>6])}> ]> ==> <[ <{5}> | empty nil  ]>.
+Proof.
+self_tac.
+Qed.
+
+Lemma wrong_self: <[10 | base | vt_end | <{self ([10>>5][>6])}> ]> ==> <[ <{6}> | empty nil  ]>.
+Proof.
+try self_tac.
+Abort.
+
+Lemma uid: <[10 | base | vt_end | <{uid}> ]> ==> <[ <{10}> | empty nil  ]>.
+Proof.
+uid_tac.
+Qed.
+
+Lemma wrong_uid: <[10 | base | vt_end | <{uid}> ]> ==> <[ <{100}> | empty nil  ]>.
+Proof.
+try uid_tac.
+Abort.
+
+Lemma fold: <[ 4 | base | vt_el 2 (empty nil) (vt_el 3 (empty nil) (vt_end)) | <{ nfold ([> fun fun0[x:Nat] {fun fun0[y:Nat] {mult x y} }]) ([2>>4][3>>5][>6]) ([>7]) }> ]> ==> <[ <{[>140]}> | empty nil ]>.
+Proof.
+nfold_tac.
+app_tac <{[> fun fun0 [y : Nat] {mult ([>5]) y}]}> <{[>28]}>.
+  -app_tac <{[ > fun fun0 [x : Nat] {fun fun0 [y : Nat] {mult x y}}]}> <{[>5]}>.
+    +nval_tac.
+    +lit_tac.
+    +fun_tac. lit_tac.
+  -app_tac <{[ > fun fun0 [y : Nat] {mult ([>4]) y}]}> <{[>7]}>.
+    +app_tac <{[ > fun fun0 [x : Nat] {fun fun0 [y : Nat] {mult x y}}]}> <{[>4]}>. 
+      nval_tac.
+      lit_tac.
+      fun_tac;lit_tac.
+    +lit_tac.
+    +fun_tac. mult_tac.
+  -fun_tac. mult_tac.
+Qed.
 
