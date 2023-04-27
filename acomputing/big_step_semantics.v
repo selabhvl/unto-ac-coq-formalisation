@@ -99,7 +99,7 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
             w_value w_r ->
             <[ id | sigma | pi_env 0 env  | exp_app w_f (get_messages id w_i env) ]> ==> <[ <{w_r}> | theta ]> ->
             <[ id | sigma | env | <{exchange w_i w_f}> ]>  ==> <[ <{w_r}> | some w_r (cons theta nil) ]> 
-
+ 
 where "t '==>' t'" := (bigstep t t').
 
 

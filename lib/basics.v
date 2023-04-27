@@ -37,7 +37,7 @@ let l_b :=
         | <{fun n [y:T] {t1}}> => 
               bounded t1 (cons y l_bounded)
         | l_sensor s => True
-        | l_fail => False
+        | l_fail => True
         | l_true => True
         | l_false => True
         | l_const n => True
