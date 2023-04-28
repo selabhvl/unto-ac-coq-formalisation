@@ -16,7 +16,6 @@ Notation "<[ id | s | v_env |  ex  ]>" := (Input id s v_env ex).
 
 Notation "<[ ex | theta ]>" := (Output ex theta).
 
-
 Definition l_prod (l0:literal) (l1:literal): literal :=
 match l0,l1 with
 | l_const x, l_const y => l_const (x * y)
@@ -47,21 +46,21 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
 
   | E_APP : forall (id:ident) (sigma:sensor_state) (env:value_tree_env) 
             (w0:nvalue) (w1:nvalue) (w2:nvalue) f e0 e1 (theta0:value_tree) (theta1:value_tree) (theta2:value_tree),
-            w_value w0 ->
-            w_value w1 ->
-            w_value w2 ->
-            f = (nvalues.get id w0 ) ->
-            is_fun f ->
             <[ id | sigma | pi_env 0 env  | <{e0}> ]> ==> <[ <{w0}> | theta0 ]> ->
+            w_value w0 ->      
+            f = (nvalues.get id w0 ) ->
+            is_fun f ->  
             <[ id | sigma | pi_env 1 env  | <{e1}> ]> ==> <[ <{w1}> | theta1 ]> ->
+            w_value w1 ->
             <[ id | sigma | pi_env 2 (select_f env f)  | <{f w1}> ]> ==> <[ <{w2}> | theta2 ]> ->
+            w_value w2 -> 
             <[ id | sigma | env | <{e0 e1}> ]> ==> <[ <{w2}> | some <{[>f]}> (cons theta0 (cons theta1 (cons theta2 nil))) ]>  
 
   | A_FUN : forall (id:ident) (sigma:sensor_state) (env:value_tree_env) (theta:value_tree)
             n x type e (w_in:nvalue) (w_out:nvalue),
             w_value w_in ->
-            w_value w_out ->
             <[ id | sigma | env | <{ /n:=(fun n [x:type] {e})/ /x:=w_in/ e }> ]> ==> <[ <{w_out}> | theta ]> ->
+            w_value w_out ->
             <[ id | sigma | env | <{(fun n [x:type] {e}) w_in}> ]> ==> <[  <{w_out}> | theta ]>
 
   | A_SENS : forall (id:ident) (sigma:sensor_state) (env:value_tree_env)
@@ -80,8 +79,8 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
   | A_MULT : forall (id:ident) (sigma:sensor_state) (env:value_tree_env) (w0:nvalue) (w1:nvalue)  (w2:nvalue) ,
             w_value w0 ->
             w_value w1 ->
-            w_value w2 ->
             <[ id | sigma | env | (pointWise l_prod w0 w1) ]> ==> <[ <{w2}> | empty nil ]> ->
+            w_value w2 ->
             <[ id | sigma | env | <{mult w0 w1}> ]>  ==> <[ <{w2}> | empty nil ]> 
   
   | A_FOLD : forall (id:ident) (sigma:sensor_state) (env:value_tree_env) (w1:nvalue) (w2:nvalue) (w3:nvalue) (l:literal) (theta:value_tree),
@@ -101,6 +100,8 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
             <[ id | sigma | env | <{exchange w_i w_f}> ]>  ==> <[ <{w_r}> | some w_r (cons theta nil) ]> 
  
 where "t '==>' t'" := (bigstep t t').
+
+
 
 
 

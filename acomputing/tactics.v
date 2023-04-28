@@ -34,11 +34,11 @@ match goal with
 | _ => nval_tac
 end].
 
-Ltac fun_tac := apply A_FUN; [>w_tac|w_tac|simpl].
+Ltac fun_tac := apply A_FUN; [>w_tac|simpl|w_tac].
 
 Ltac sens_tac := 
 apply A_SENS;
-[>w_tac|
+[>w_tac| 
 unfold base; repeat (unfold add); simpl;
 lazymatch goal with 
 | [|- context [l_fail]]=> fail
@@ -49,9 +49,57 @@ Ltac self_tac := apply A_SELF; [>w_tac|reflexivity].
 
 Ltac uid_tac := apply A_UID.
 
-Ltac app_tac x y:= apply E_APP with (w0:=x) (w1:=y); [>w_tac|w_tac|w_tac|simpl;auto|apply func|idtac "TO SOLVE E1"|idtac "TO SOLVE E2"|idtac "TO SOLVE FUN"].
+Ltac app_tac x y:= apply E_APP with (w0:=x) (w1:=y); [>idtac "TO SOLVE E1"|w_tac|simpl;auto|apply func|idtac "TO SOLVE E2"|w_tac|idtac "TO SOLVE FUN"|w_tac].
 
 Ltac nfold_tac := eapply A_FOLD;[>w_tac|w_tac|w_tac|unfold value;simpl;auto|simpl].
+
+Ltac exchange_tac := apply A_EXCHANGE; [w_tac|w_tac|w_tac|simpl].
+
+
+(*
+Ltac device_tac :=
+first 
+[idtac "NVAL";nval_tac |
+idtac "LIT";lit_tac |
+idtac "VAR";var_tac |
+idtac "MULT";mult_tac |
+idtac "FUN";apply A_FUN; [>w_tac|w_tac|simpl;device_tac] |
+idtac "SENS";sens_tac |
+idtac "SELF";self_tac |
+idtac "UID";uid_tac |
+idtac "FOLD";eapply A_FOLD;[>w_tac|w_tac|w_tac|unfold value;simpl;auto|device_tac] |
+idtac "EXCHANGE";apply A_EXCHANGE; [>w_tac|w_tac|w_tac|simpl;device_tac]
+].
+*)
+
+
+(*Importante mettere i builtin prima altrimenti li prende come applicazioni*)
+Ltac device_tac :=
+repeat (
+first [
+simpl;auto;
+(match goal with 
+| [|- w_value ?X] =>idtac "W_TAC"; w_tac
+| [|- value ?X] => idtac "VALUE";unfold value; simpl; auto
+| [|- is_fun ?X] => idtac "FUNC";apply func
+| _ => fail
+end
+)
+| eapply A_MULT;idtac "MULT"
+| eapply A_SELF;idtac "SELF"
+| eapply A_UID;idtac "UID"
+| eapply A_FOLD;idtac "FOLD"
+| eapply A_EXCHANGE;idtac "EXCHANGE"
+
+| eapply E_NVAL;idtac "NVAL"
+| eapply E_LIT;idtac "LIT"
+| eapply E_VAR;idtac "VAR"
+| fail;idtac "FAIL"
+| eapply A_FUN;idtac "FUN"
+| eapply E_APP;idtac "APP"
+| eapply A_SENS;idtac "SENS"
+
+]).
 
 
 Definition x:string := "x".
@@ -61,7 +109,7 @@ Definition s0:string := "s0".
 Definition s1:string := "s1".
 Definition fun0:string := "fun0".
 
-Lemma mult: <[ 10 | base | vt_end |   <{mult ([1>>5][2>>5][>5]) ([1>>5][>6]) }> ]> ==> <[ <{ [1>>25][2>>30][>30]}> | empty nil ]>.
+Lemma mult: <[ 10 | base | vt_end |   <{ mult ([1>>5][2>>5][>5]) ([1>>5][>6]) }> ]> ==> <[ <{ [1>>25][2>>30][>30]}> | empty nil ]>.
 Proof.
 mult_tac.
 Qed.
@@ -91,12 +139,12 @@ Proof.
 try var_tac.
 Abort.
 
-Lemma func: <[10 | base | vt_end | <{fun fun0[x:Nat]{mult x ([>5])} ([>6])}> ]> ==> <[ <{[>30]}> | empty nil  ]>.
+Lemma p_func: <[10 | base | vt_end | <{fun fun0[x:Nat]{mult x ([>5])} ([>6])}> ]> ==> <[ <{[>30]}> | empty nil  ]>.
 Proof.
 fun_tac. mult_tac.
 Qed.
 
-Lemma wrong_func: <[10 | base | vt_end | <{fun fun0[x:Nat]{mult x ([>5])} ([>6])}> ]> ==> <[ <{[>25]}> | empty nil  ]>.
+Lemma wrong_p_func: <[10 | base | vt_end | <{fun fun0[x:Nat]{mult x ([>5])} ([>6])}> ]> ==> <[ <{[>25]}> | empty nil  ]>.
 Proof.
 try (fun_tac; mult_tac).
 Abort.
@@ -148,4 +196,22 @@ app_tac <{[> fun fun0 [y : Nat] {mult ([>5]) y}]}> <{[>28]}>.
     +fun_tac. mult_tac.
   -fun_tac. mult_tac.
 Qed.
+
+Lemma p_exchange : <[ 10 | base | vt_el 2 (some <{[10>>4][>6]}> nil) (vt_el 3 (some <{[10>>6][>6]}> nil) (vt_end)) | <{exchange ([>5]) ([>fun fun0[x:Nat]{x}])}> ]>  ==> <[ <{[2>>4][3>>6][>5]}> | some <{[2>>4][3>>6][>5]}> (cons (some <{[>fun fun0[x:Nat]{x}]}> (cons (empty nil) (cons (empty nil) (cons (empty nil) nil))) ) nil) ]>. 
+Proof.
+exchange_tac.
+app_tac <{[> fun fun0 [x : Nat] {x}]}> <{[2 >> 4][3 >> 6][ > 5]}>.
+  -nval_tac. 
+  -nval_tac. 
+  -fun_tac. nval_tac. 
+Qed.
+
+Lemma e_fold: <[ 4 | base | vt_el 2 (empty nil) (vt_el 3 (empty nil) (vt_end)) | <{ nfold ([> fun fun0[x:Nat] {fun fun0[y:Nat] {mult x y} }]) ([2>>4][3>>5][>6]) ([>7]) }> ]> ==> <[ <{[>140]}> | empty nil ]>.
+Proof.
+device_tac.
+Qed.
+
+
+
+
 
