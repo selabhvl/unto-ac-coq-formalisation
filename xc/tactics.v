@@ -167,7 +167,8 @@ Proof.
 device_tac.
 Qed.
 
-Lemma p_exchange : <[ 10 | base | vt_el 2 (some <{[10>>4][>6]}> nil) (vt_el 3 (some <{[10>>6][>6]}> nil) (vt_end)) | <{exchange ([>5]) ([>fun fun0[x:Nat]{x}])}> ]>  ==> <[ <{[2>>4][3>>6][>5]}> | some <{[2>>4][3>>6][>5]}> (cons (some <{[>fun fun0[x:Nat]{x}]}> (cons (empty nil) (cons (empty nil) (cons (empty nil) nil))) ) nil) ]>. 
+Lemma p_exchange : <[ 10 | base | vt_el 2 (some <{[10>>4][>6]}> nil) (vt_el 3 (some <{[10>>6][>6]}> nil) (vt_end)) | <{exchange ([>5]) ([>fun fun0[x:Nat]{x}])}> ]>  ==> 
+<[ <{[2>>4][3>>6][>5]}> | some <{[2>>4][3>>6][>5]}> (cons (some <{[>fun fun0[x:Nat]{x}]}> (cons (empty nil) (cons (empty nil) (cons (empty nil) nil))) ) nil) ]>. 
 Proof. 
 exchange_tac.
 app_tac <{[> fun fun0 [x : Nat] {x}]}> <{[2 >> 4][3 >> 6][ > 5]}>.
