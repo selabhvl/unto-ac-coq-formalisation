@@ -30,6 +30,7 @@ end].
 Ltac mult_tac  := 
 solve [apply A_MULT;
 match goal with
+| [|- context [l_fail] ] => fail
 | [|- w_value ?X] => w_tac
 | _ => nval_tac
 end].
@@ -54,24 +55,6 @@ Ltac app_tac x y:= apply E_APP with (w0:=x) (w1:=y); [>idtac "TO SOLVE E1"|w_tac
 Ltac nfold_tac := eapply A_FOLD;[>w_tac|w_tac|w_tac|unfold value;simpl;auto|simpl].
 
 Ltac exchange_tac := apply A_EXCHANGE; [w_tac|w_tac|w_tac|simpl].
-
-
-(*
-Ltac device_tac :=
-first 
-[idtac "NVAL";nval_tac |
-idtac "LIT";lit_tac |
-idtac "VAR";var_tac |
-idtac "MULT";mult_tac |
-idtac "FUN";apply A_FUN; [>w_tac|w_tac|simpl;device_tac] |
-idtac "SENS";sens_tac |
-idtac "SELF";self_tac |
-idtac "UID";uid_tac |
-idtac "FOLD";eapply A_FOLD;[>w_tac|w_tac|w_tac|unfold value;simpl;auto|device_tac] |
-idtac "EXCHANGE";apply A_EXCHANGE; [>w_tac|w_tac|w_tac|simpl;device_tac]
-].
-*)
-
 
 (*Importante mettere i builtin prima altrimenti li prende come applicazioni*)
 Ltac device_tac :=
@@ -179,26 +162,13 @@ Proof.
 try uid_tac.
 Abort.
 
-Lemma fold: <[ 4 | base | vt_el 2 (empty nil) (vt_el 3 (empty nil) (vt_end)) | <{ nfold ([> fun fun0[x:Nat] {fun fun0[y:Nat] {mult x y} }]) ([2>>4][3>>5][>6]) ([>7]) }> ]> ==> <[ <{[>140]}> | empty nil ]>.
+Lemma fold: <[ 4 | base | vt_el 2 (empty nil) (vt_el 3 (empty nil) (vt_end)) | <{ nfold ([> fun fun0[x:Nat] {fun fun0[y:Nat] {mult x y} }]) ([2>>3][3>>5][>6]) ([>7]) }> ]> ==> <[ <{[>105]}> | empty nil ]>.
 Proof.
-nfold_tac.
-app_tac <{[> fun fun0 [y : Nat] {mult ([>5]) y}]}> <{[>28]}>.
-  -app_tac <{[ > fun fun0 [x : Nat] {fun fun0 [y : Nat] {mult x y}}]}> <{[>5]}>.
-    +nval_tac.
-    +lit_tac.
-    +fun_tac. lit_tac.
-  -app_tac <{[ > fun fun0 [y : Nat] {mult ([>4]) y}]}> <{[>7]}>.
-    +app_tac <{[ > fun fun0 [x : Nat] {fun fun0 [y : Nat] {mult x y}}]}> <{[>4]}>. 
-      nval_tac.
-      lit_tac.
-      fun_tac;lit_tac.
-    +lit_tac.
-    +fun_tac. mult_tac.
-  -fun_tac. mult_tac.
+device_tac.
 Qed.
 
 Lemma p_exchange : <[ 10 | base | vt_el 2 (some <{[10>>4][>6]}> nil) (vt_el 3 (some <{[10>>6][>6]}> nil) (vt_end)) | <{exchange ([>5]) ([>fun fun0[x:Nat]{x}])}> ]>  ==> <[ <{[2>>4][3>>6][>5]}> | some <{[2>>4][3>>6][>5]}> (cons (some <{[>fun fun0[x:Nat]{x}]}> (cons (empty nil) (cons (empty nil) (cons (empty nil) nil))) ) nil) ]>. 
-Proof.
+Proof. 
 exchange_tac.
 app_tac <{[> fun fun0 [x : Nat] {x}]}> <{[2 >> 4][3 >> 6][ > 5]}>.
   -nval_tac. 

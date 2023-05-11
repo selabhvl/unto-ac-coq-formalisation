@@ -1,9 +1,9 @@
-acomputing/syntax.v
+xc/syntax.v
 lib/basics.v
 lib/nvalues.v
 lib/value_tree.v
 lib/sensor_state.v
-acomputing/big_step_semantics.v
+xc/big_step_semantics.v
 test/basics_test.v
 test/nvalues_test.v
 test/value_tree_test.v
