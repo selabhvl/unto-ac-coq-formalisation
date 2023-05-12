@@ -3,6 +3,8 @@ From AC Require Import basics.
 From AC Require Import sensor_state.
 From AC Require Import value_tree.
 From AC Require Import nvalues.
+From AC Require Import big_step_semantics.
+From AC Require Import tactics.
 Require Import Bool.
 Require Import String.
 Require Import List.
@@ -72,15 +74,48 @@ else (before_event b_e next b_R b_vts b_d)
 | nil => vt_end
 end.
 
+Inductive net_conf_in: Type := netI : AES -> exp -> net_conf_in.
+Inductive net_conf_out: Type := netO : STV -> vt_net -> net_conf_out.
+
+
+Reserved Notation "t '|=>' t'" (at level 40).
+Inductive net_val: net_conf_in -> net_conf_out -> Prop :=
+| E_NET : forall (e_main:exp) (n_E:E_net) (n_R:R_net) (n_d:d_net) (n_s:s_net) (n_stv:STV) (n_vts:vt_net),
+
+(fix check_all (n_E : E_net) : Prop := 
+match n_E with                                    
+| cons ev next => (<[(n_d ev) | (n_s ev) | (before_event ev n_E n_R n_vts n_d) | e_main ]>
+ ==> <[ (n_stv ev) | (n_vts ev)]>) /\ (check_all next) 
+| nil => True                                    
+end) n_E
+
+-> netI (aes n_E n_R n_d n_s) e_main |=> netO n_stv n_vts
+where "t '|=>' t'" := (net_val t t').
+
+
+
 Definition ex_E: E_net := cons (e 0 0) (cons (e 0 1) (cons (e 1 0) (cons (e 1 1) (cons (e 3 0) nil)))).
 
-Definition ex_R: R_net := cons (forward (e 3 0) (e 0 1)) (cons (forward (e 1 1) (e 0 1)) nil).
-
-Definition ex_vts := add_vt (e 1 1) (some <{[0>>3][>5]}> nil) (add_vt (e 3 0) (some <{[0>>5][>5]}> nil) base_vt).
+Definition ex_R: R_net := cons (forward (e 0 0) (e 0 1)) (cons (forward (e 1 0) (e 1 1))
+ (cons (forward (e 3 0) (e 0 1)) (cons (forward (e 1 0) (e 0 1)) nil))).
 
 Definition ex_d := add_d (e 0 0) 0 (add_d (e 0 1) 0 (add_d (e 1 0) 1 (add_d (e 1 1) 1 (add_d (e 3 0) 3 (base_d))))).
 
-Compute (before_event (e 0 1) ex_E ex_R ex_vts ex_d).
+Definition ex_vts := add_vt (e 0 0) (empty nil) (add_vt (e 0 1) (empty nil) (add_vt (e 1 0) (empty nil) 
+(add_vt (e 1 1) (empty nil) (add_vt (e 3 0) (empty nil) base_vt)))).
+
+Definition ex_stv := add_STV (e 0 0) <{[>5]}> (add_STV (e 0 1) <{[>5]}> (add_STV (e 1 0) <{[>5]}> (add_STV (e 1 1) <{[>5]}>
+ (add_STV (e 3 0) <{[>5]}> (base_STV))))).
+
+Lemma ex_test : netI (aes ex_E ex_R ex_d base_s) <{5}> |=> netO ex_stv ex_vts.
+Proof.
+apply E_NET. simpl. repeat split;device_tac.
+Qed.
+
+
+
+
+
 
 
 
