@@ -44,11 +44,9 @@ match w0,w1 with
                                             else device a1 (getDefault w0) (extend1 m1))
 end. 
 
-
-
 Fixpoint folding (delta:ident) (devs:list nat) (w1:nvalue) (w2:nvalue) (w3:nvalue) : exp :=
 match devs with 
-| cons id l => if (delta =? id) then (folding id l w1 w2 w3) else exp_app (exp_app w1 (nvalues.get id w2)) (folding delta l w1 w2 w3)
+| cons id l => if (delta =? id) then (folding id l w1 w2 w3) else exp_app_1 (exp_app_1 w1 (nvalues.get id w2)) (folding delta l w1 w2 w3)
 | nil => (get delta w3)
 end.
 

@@ -4,6 +4,7 @@ From AC Require Import sensor_state.
 From AC Require Import value_tree.
 From AC Require Import basics.
 From AC Require Import nvalues.
+From AC Require Import tactics.
 Require Import String.
 
 (*NOTATION*)
@@ -19,17 +20,33 @@ Hint Unfold y : core.
 Hint Unfold z : core.
 
 Lemma multiplication: <[ 10 | base | vt_end |   <{mult ([2>>5][>5]) ([1>>5][>6]) }> ]> ==> <[ <{ [1>>25][2>>30][>30]}> | empty nil ]>.
-Proof.
+Proof. 
 apply A_MULT.
 -split. apply ordered1. simpl. auto.
 -split. apply ordered1. simpl. auto.
--split. apply ordered2. auto. apply ordered1. simpl. auto.
 -simpl. apply E_NVAL. 
 split. apply ordered2. auto. apply ordered1. simpl. auto.
+-unfold w_value. split. apply ordered2. auto. apply ordered1. simpl. auto. 
 Qed.
 
-Lemma fold00: <[ 4 | base | vt_el 2 (empty nil) (vt_el 3 (empty nil) (vt_end)) | <{ nfold ([> fun fun0[x:Nat] {fun fun0[y:Nat] {mult x y} }]) ([2>>4][3>>5][>6]) ([>7]) }> ]> ==> <[ <{[>140]}> | empty nil ]>.
+Lemma fold00: exists w, <[ 4 | base | vt_el 2 (empty nil) (vt_el 3 (empty nil) (vt_end)) | <{ nfold ([> fun fun0[x] {fun fun0[y] {mult x y} }]) ([2>>4][3>>5][>6]) ([>7]) }> ]> ==> <[ <{w}> | empty nil ]>.
 Proof.
+eexists.
+nfold_tac.
+eapply E_APP.
+-eapply E_APP.
++ nval_tac.
++ w_tac.
++ auto.
++ apply func.
++ lit_tac.
++ w_tac.
++ simpl. 
++
+ 
+
+device_tac.
+(*
 eapply A_FOLD.
 -split. 
 + apply ordered0.
@@ -41,7 +58,7 @@ eapply A_FOLD.
 + apply ordered0.
 + simpl. auto.
 - unfold value. simpl. auto.
-- simpl. eapply E_APP with (w0:=<{[> fun fun0 [y : Nat] {mult ([>5]) y}]}>) (w1:=<{[>28]}>).
+- simpl. eapply E_APP with (w0:=<{[> fun fun0 [y] {mult ([>5]) y}]}>) (w1:=<{[>28]}>).
 + split. apply ordered0. simpl. auto.
 + split. apply ordered0. simpl. auto.
 + split. apply ordered0. simpl. auto.
@@ -89,7 +106,7 @@ split. apply ordered0. simpl. auto.
 split. apply ordered0. simpl. auto.
 simpl. apply E_NVAL. split. apply ordered0. simpl. auto.
 Qed.
-
+*)
 (*
 Lemma fold00_R: <[ 4 | base | vt_el 2 (empty nil) (vt_el 3 (empty nil) (vt_end)) | <{ nfold [> fun fun0[x:Nat] {fun fun0[y:Nat] {x*y} }] [2>>4][3>>5][>6] [>7] }> ]> ==> <[ <{[>140]}> | empty nil ]>.
 Proof. 

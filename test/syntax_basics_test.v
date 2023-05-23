@@ -19,31 +19,29 @@ Hint Unfold y : core.
 Hint Unfold z : core.
 
 Check <{x}>.
-Check <{fun prod5 [x:Nat] {x * [>5]} 5}>.
-Check <{x (fun prod5 [x:Nat] {x * 5})}>.
-Check <{val n = 25 ; n * 2}>.
+Check <{fun prod5 [x] {mult (x) ([>5])} 5}>.
+Check <{x (fun prod5 [x] {mult (x) (5)})}>.
+Check <{val n = 25 ; mult (n) (2)}>.
 Check <{[4 >> 2][5 >> 5][6 >> 4][ > 5]}>.
 
 
 (*Bounded Test*)
-Compute (bounded <{fun fun0 [x:Nat] {x}}>).
+Compute (bounded <{fun fun0 [x] {x}}>).
 
-Lemma bounded0 : bounded <{fun fun0 [x:Nat] {x}}> nil.
+Lemma bounded0 : bounded <{fun fun0 [x] {x}}> nil.
 Proof.
 simpl. left. reflexivity.
 Qed.
 
-Lemma bounded1 : bounded <{fun fun0 [x:Nat] {x * y}}> nil.
+Lemma bounded1 : bounded <{fun fun0 [x] {mult x y}}> nil.
 Proof.
-simpl. split.
--left. reflexivity.
--left.
+simpl. split. auto.
 Abort.
 
-Lemma bounded2 : bounded <{fun fun0 [x:Nat] {x * (fun fun1 [y:Nat] {y})}}> nil.
+Lemma bounded2 : bounded <{fun fun0 [x] {mult x (fun fun1 [y] {y})}}> nil.
 Proof.
 simpl. split.
--left. reflexivity.
+-auto.
 -left. reflexivity.
 Qed.
 

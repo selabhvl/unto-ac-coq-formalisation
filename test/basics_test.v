@@ -14,28 +14,28 @@ Definition fun1: string := "fun1".
 Definition prod5: string := "prod5". 
 
 Check <{x}>.
-Check <{fun prod5 [x:Nat] {mult x ([>5])} 5}>.
-Check <{x (fun prod5 [x:Nat] {mult x 5})}>.
+Check <{fun prod5 [x] {mult x ([>5])} 5}>.
+Check <{x (fun prod5 [x] {mult x 5})}>.
 Check <{val n = 25 ; mult n 2}>.
 Check <{[4 >> 2][5 >> 5][6 >> 4][ > 5]}>.
 Check <{uid}>.
 Check <{self ([>6])}>.
 Check <{sensor x}>.
 Check <{FAIL}>.
-Check <{nfold ([> fun fun1 [x:Nat] {fun fun0  [y:Nat] {x}}]) ([0 >> 5][1 >> 3][ > 4 ]) ([> 5])}>.
+Check <{nfold ([> fun fun1 [x] {fun fun0  [y] {x}}]) ([0 >> 5][1 >> 3][ > 4 ]) ([> 5])}>.
 
 
 Compute (<{/x:=5/ (mult x y)}>).
 
-Compute (<{ /y:=10/ fun prod5 [x:Nat] {mult x (mult y ([>5])) } }>).
+Compute (<{ /y:=10/ fun prod5 [x] {mult x (mult y ([>5])) } }>).
 
-Compute <{/x:=4/ (x (fun prod5 [x:Nat] {mult x 5}))}>.
+Compute <{/x:=4/ (x (fun prod5 [x] {mult x 5}))}>.
 
-Compute <{/prod5:=4/ (x (fun prod5 [x:Nat] {mult x 5}))}>.
+Compute <{/prod5:=4/ (x (fun prod5 [x] {mult x 5}))}>.
 
 Compute (bounded <{x}> nil).
 
-Lemma test1 : bounded <{fun fun0 [x:Nat] {x} }> nil.
+Lemma test1 : bounded <{fun fun0 [x] {x} }> nil.
 Proof.
 simpl. auto.
 Qed.
@@ -45,17 +45,17 @@ Proof.
 simpl. auto.
 Qed.
 
-Lemma test3 : bounded <{[0 >> (fun fun0 [x:Nat] {x})][>5]}> nil.
+Lemma test3 : bounded <{[0 >> (fun fun0 [x] {x})][>5]}> nil.
 Proof.
 simpl. split. left. auto. auto. 
 Qed.
 
-Lemma test4 : bounded <{[0 >> (fun fun0 [x:Nat] {mult x y})][>5]}> nil.
+Lemma test4 : bounded <{[0 >> (fun fun0 [x] {mult x y})][>5]}> nil.
 Proof.
 simpl. split. split. auto. 
 Abort.
 
-Lemma test4 : bounded <{nfold ([0 >> (fun fun0 [x:Nat] {mult x y})][>5]) ([0>>5][>6]) ([>6]) }> nil.
+Lemma test4 : bounded <{nfold ([0 >> (fun fun0 [x] {mult x y})][>5]) ([0>>5][>6]) ([>6]) }> nil.
 Proof.
 simpl. split. split. split. auto. 
 Abort.
@@ -70,7 +70,7 @@ Proof.
 split. apply ordered2. 
 Abort.
 
-Lemma w_test2 :  w_value <{[1 >> (fun fun0 [x:Nat] {y})][2 >> 4][>3]}>.
+Lemma w_test2 :  w_value <{[1 >> (fun fun0 [x] {y})][2 >> 4][>3]}>.
 Proof.
 split. 
 - apply ordered2. auto. apply ordered1. 

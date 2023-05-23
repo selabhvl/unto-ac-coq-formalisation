@@ -54,19 +54,19 @@ Compute (pi_env 3 vt_env_0).
 Definition pop:string:="pop".
 Definition top:string:="top".
 Definition x:string:="x".
-Compute (name_f <{fun pop[x:Nat] {5} }>).
+Compute (name_f <{fun pop[x] {5} }>).
 Compute (name_f <{x}>).
 
 (*Test select_f*)
 
-Compute (select_f  (vt_el 5 (some <{[>fun pop[x:Nat] {5}]}> nil ) 
-(vt_el 6 (some <{[>fun pop[x:Nat] {5}]}> nil ) vt_end ) )  <{fun pop[x:Nat] {5} }>).
+Compute (select_f  (vt_el 5 (some <{[>fun pop[x] {5}]}> nil ) 
+(vt_el 6 (some <{[>fun pop[x] {5}]}> nil ) vt_end ) )  <{fun pop[x] {5} }>).
 
-Compute (select_f  (vt_el 5 (some <{[>fun pop[x:Nat] {5}]}> nil ) 
-(vt_el 6 (some <{[>fun top[x:Nat] {5}]}> nil ) vt_end ) )  <{fun pop[x:Nat] {5} }>).
+Compute (select_f  (vt_el 5 (some <{[>fun pop[x] {5}]}> nil ) 
+(vt_el 6 (some <{[>fun top[x] {5}]}> nil ) vt_end ) )  <{fun pop[x] {5} }>).
 
-Compute (select_f  (vt_el 5 (some <{[>fun pop[x:Nat] {5}]}> nil ) 
-(vt_el 6 (some <{[>6]}> nil ) vt_end ) )  <{fun pop[x:Nat] {5} }>).
+Compute (select_f  (vt_el 5 (some <{[>fun pop[x] {5}]}> nil ) 
+(vt_el 6 (some <{[>6]}> nil ) vt_end ) )  <{fun pop[x] {5} }>).
 
 (*Test get_messages*)
 

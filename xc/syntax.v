@@ -13,23 +13,20 @@ Require Import List.
 (** The identifier of a device is seen as natural number*)
 Definition ident := nat.
 
-Inductive ty : Type :=
-  | Ty_Builtin : Type -> ty
-  | Ty_Arrow : ty -> ty -> ty.
-
-
 (** SYNTAX of an EXPRESSION, including LITERALS and NVALUES*)
 (** An expression can be a 
 variable (rappresented by string), .... *)
 Inductive exp: Type :=
-  | exp_var : string -> exp
-  | exp_app : exp -> exp -> exp
+  | exp_var :string -> exp
+  | exp_app_1 : exp -> exp -> exp
+  | exp_app_2 : exp -> exp -> exp -> exp
+  | exp_app_3 : exp -> exp -> exp -> exp -> exp
   | exp_val : string -> exp -> exp -> exp
   | exp_literal : literal -> exp
   | exp_nvalue : nvalue -> exp
 with literal :=
   | l_builtin : builtin -> literal
-  | l_abs : string -> string -> ty -> exp -> literal 
+  | l_abs : string -> string -> exp -> literal 
   | l_sensor: string -> literal
   | l_fail : literal
   | l_true : literal
@@ -45,7 +42,9 @@ with builtin :=
   | b_uid: builtin
   | b_succ : builtin
   | b_pred : builtin 
-  | b_mult : builtin.
+  | b_mult : builtin
+  | b_or : builtin
+  | b_and : builtin.
 
 Declare Custom Entry acnotation.
 
@@ -53,16 +52,18 @@ Declare Custom Entry acnotation.
 nvalues*)
 Notation "<{ e }>" := e (e custom acnotation at level 99).
 
-Notation "'fun' name [ x :  t ]  { y }" :=
-  (l_abs name x t y) (in custom acnotation at level 90, 
+Notation "'fun' name [ x ]  { y }" :=
+  (l_abs name x y) (in custom acnotation at level 90, 
                      name at level 99,
                      x at level 99,
-                     t custom acnotation at level 99,
                      y custom acnotation at level 99,
                      name at level 99,
                      left associativity).
 
-Notation "x y " := (exp_app x y) (in custom acnotation at level 1, left associativity).
+Notation "'app' x  $ y $" := (exp_app_1 x y) (in custom acnotation at level 1).
+Notation "'app' x  $ y z $" := (exp_app_2 x y z) (in custom acnotation at level 1).
+Notation "'app' x  $ y z j $" := (exp_app_3 x y z j) (in custom acnotation at level 1).
+
 Notation "( x )" := x (in custom acnotation, x at level 99).
 Notation "x" := x (in custom acnotation at level 0, x constr at level 0).
 
@@ -71,10 +72,6 @@ Notation "'val' name = x ; y" := (exp_val name x y) (in custom acnotation at lev
                                                     x custom acnotation at level 99,
                                                     y custom acnotation at level 99,
                                                     left associativity).
-
-Notation "S -> T" := (Ty_Arrow S T) (in custom acnotation at level 50, right associativity).
-Notation "'Nat'" := (Ty_Builtin nat) (in custom acnotation at level 0).
-Notation "'Bool'" := (Ty_Builtin bool) (in custom acnotation at level 0).
 
 Notation "'true'" := true (at level 1).
 Notation "'true'" := l_true (in custom acnotation at level 0).
@@ -105,3 +102,6 @@ Coercion l_builtin : builtin >-> literal.
 Coercion exp_literal: literal >-> exp.
 Coercion l_const: nat >-> literal.
 Coercion exp_nvalue: nvalue >-> exp.
+
+Check <{app [>5] $ [>5] [>5] $ }>.
+

@@ -48,7 +48,7 @@ end.
 
 Definition name_f (e:exp): option string :=
 match e with
-| <{fun n[x:T] {m}}> => Some n
+| <{fun n[x] {m}}> => Some n
 | _ => None
 end.
 

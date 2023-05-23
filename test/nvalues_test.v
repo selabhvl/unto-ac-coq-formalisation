@@ -40,4 +40,4 @@ Compute (extend (device  1 2(device  3 5(device  5 7(device  7 3(default  1)))))
 
 Compute (extend (device  2 2(device  4 5(device  6 7(device  7 3(default  2)))))  (device  1 2(device  3 5(device  5 7(device  7 3 (default  1)))))).
 
-Compute (folding 4 (rev (devices (vt_el 4 (empty nil) (vt_el 5 (empty nil) vt_end)))) <{[ > fun fun0[x:Nat] {fun fun0[y:Nat] {mult x y} }]}>  <{[4 >> 2][5 >> 6][> 7]}> <{[>6]}> ).
+Compute (folding 4 (rev (devices (vt_el 4 (empty nil) (vt_el 5 (empty nil) vt_end)))) <{[ > fun fun0[x] {fun fun0[y] {mult x y} }]}>  <{[4 >> 2][5 >> 6][> 7]}> <{[>6]}> ).

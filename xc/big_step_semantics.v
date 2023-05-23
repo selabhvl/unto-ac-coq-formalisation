@@ -22,6 +22,25 @@ match l0,l1 with
 | _ , _ => l_fail
 end.
 
+Definition l_or (l0:literal) (l1:literal): literal :=
+match l0,l1 with
+| l_false, l_false=> l_false
+| l_true, l_false=> l_true
+| l_false, l_true=> l_true
+| l_true, l_true=> l_true
+| _ , _ => l_fail
+end.
+
+Definition l_and (l0:literal) (l1:literal): literal :=
+match l0,l1 with
+| l_false, l_false=> l_false
+| l_true, l_false=> l_false
+| l_false, l_true=> l_false
+| l_true, l_true=> l_true
+| _ , _ => l_fail
+end.
+
+
 Reserved Notation "t '==>' t'" (at level 40).
 Inductive bigstep : conf_in -> conf_out -> Prop :=
 
@@ -33,8 +52,9 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
 
   | E_VAR : forall (id:ident) (sigma:sensor_state) (env:value_tree_env)
             (w:nvalue) x,
+            w=(sigma x) ->
             w_value w ->
-            w=(sigma x) -> <[ id | sigma | env | <{x}> ]>  ==>  <[ <{w}> | empty nil ]> 
+            <[ id | sigma | env | <{x}> ]>  ==>  <[ <{w}> | empty nil ]> 
 
   | E_VAL: forall (id:ident) (sigma:sensor_state) (env:value_tree_env)
             x (w1:nvalue) (w2:nvalue) e1 e2 (theta1:value_tree) (theta2:value_tree), 
@@ -52,26 +72,57 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
             is_fun f ->  
             <[ id | sigma | pi_env 1 env  | <{e1}> ]> ==> <[ <{w1}> | theta1 ]> ->
             w_value w1 ->
-            <[ id | sigma | pi_env 2 (select_f env f)  | <{f w1}> ]> ==> <[ <{w2}> | theta2 ]> ->
+            <[ id | sigma | pi_env 2 (select_f env f)  | <{app f $ w1 $}> ]> ==> <[ <{w2}> | theta2 ]> ->
             w_value w2 -> 
-            <[ id | sigma | env | <{e0 e1}> ]> ==> <[ <{w2}> | some <{[>f]}> (cons theta0 (cons theta1 (cons theta2 nil))) ]>  
+            <[ id | sigma | env | <{app e0 $ e1 $}> ]> ==> <[ <{w2}> | some <{[>f]}> (cons theta0 (cons theta1 (cons theta2 nil))) ]>  
+
+  | E_APP_2 : forall (id:ident) (sigma:sensor_state) (env:value_tree_env) 
+            (w0:nvalue) (w1:nvalue) (w2:nvalue) (w3:nvalue) f e0 e1 e2 (theta0:value_tree) (theta1:value_tree) (theta2:value_tree) (theta3:value_tree),
+            <[ id | sigma | pi_env 0 env  | <{e0}> ]> ==> <[ <{w0}> | theta0 ]> ->
+            w_value w0 ->      
+            f = (nvalues.get id w0 ) ->
+            is_fun f ->  
+            <[ id | sigma | pi_env 1 env  | <{e1}> ]> ==> <[ <{w1}> | theta1 ]> ->
+            w_value w1 ->
+            <[ id | sigma | pi_env 1 env  | <{e2}> ]> ==> <[ <{w2}> | theta2 ]> ->
+            w_value w2 ->
+            <[ id | sigma | pi_env 2 (select_f env f)  | <{app f $ w1 w2 $}> ]> ==> <[ <{w3}> | theta3 ]> ->
+            w_value w3 -> 
+            <[ id | sigma | env | <{app e0 $e1 e2$}> ]> ==> <[ <{w3}> | some <{[>f]}> (cons theta0 (cons theta1 (cons theta2 (cons theta3 nil)))) ]>  
+
+  | E_APP_3 : forall (id:ident) (sigma:sensor_state) (env:value_tree_env) 
+            (w0:nvalue) (w1:nvalue) (w2:nvalue) (w3:nvalue) (w4:nvalue) f e0 e1 e2 e3 (theta0:value_tree) (theta1:value_tree) (theta2:value_tree) (theta3:value_tree)
+            (theta4:value_tree),
+            <[ id | sigma | pi_env 0 env  | <{e0}> ]> ==> <[ <{w0}> | theta0 ]> ->
+            w_value w0 ->      
+            f = (nvalues.get id w0 ) ->
+            is_fun f ->  
+            <[ id | sigma | pi_env 1 env  | <{e1}> ]> ==> <[ <{w1}> | theta1 ]> ->
+            w_value w1 ->
+            <[ id | sigma | pi_env 1 env  | <{e2}> ]> ==> <[ <{w2}> | theta2 ]> ->
+            w_value w2 ->
+            <[ id | sigma | pi_env 1 env  | <{e3}> ]> ==> <[ <{w3}> | theta3 ]> ->
+            w_value w3 ->
+            <[ id | sigma | pi_env 2 (select_f env f)  | <{app f $w1 w2 w3$}> ]> ==> <[ <{w4}> | theta4 ]> ->
+            w_value w4 -> 
+            <[ id | sigma | env | <{app e0 $e1 e2 e3$}> ]> ==> <[ <{w4}> | some <{[>f]}> (cons theta0 (cons theta1 (cons theta2 (cons theta3 (cons theta4 nil))))) ]>  
 
   | A_FUN : forall (id:ident) (sigma:sensor_state) (env:value_tree_env) (theta:value_tree)
-            n x type e (w_in:nvalue) (w_out:nvalue),
+            n x e (w_in:nvalue) (w_out:nvalue),
             w_value w_in ->
-            <[ id | sigma | env | <{ /n:=(fun n [x:type] {e})/ /x:=w_in/ e }> ]> ==> <[ <{w_out}> | theta ]> ->
+            <[ id | sigma | env | <{ /n:=(fun n [x] {e})/ /x:=w_in/ e }> ]> ==> <[ <{w_out}> | theta ]> ->
             w_value w_out ->
-            <[ id | sigma | env | <{(fun n [x:type] {e}) w_in}> ]> ==> <[  <{w_out}> | theta ]>
+            <[ id | sigma | env | <{app (fun n [x] {e}) $ w_in $}> ]> ==> <[  <{w_out}> | theta ]>
 
   | A_SENS : forall (id:ident) (sigma:sensor_state) (env:value_tree_env)
-            (w:nvalue) s,
-            w_value w ->
-            w=(sigma s) -> <[ id | sigma | env | <{sensor s}> ]>  ==>  <[ <{w}> | empty nil ]> 
+            (w:nvalue) s, 
+            w=(sigma s) -> 
+            w_value w -> <[ id | sigma | env | <{sensor s}> ]>  ==>  <[ <{w}> | empty nil ]> 
 
   | A_SELF :  forall (id:ident) (sigma:sensor_state) (env:value_tree_env) (w:nvalue) (l:literal),
             w_value w ->
             l = nvalues.get id w ->
-            <[ id | sigma | env | <{self w}> ]> ==> <[ <{l}> | empty nil ]> 
+            <[ id | sigma | env | <{app self $ w $}> ]> ==> <[ <{l}> | empty nil ]> 
 
   | A_UID :  forall (id:ident) (sigma:sensor_state) (env:value_tree_env),
             <[ id | sigma | env | <{uid}> ]> ==> <[ <{id}> | empty nil ]> 
@@ -81,29 +132,39 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
             w_value w1 ->
             <[ id | sigma | env | (pointWise l_prod w0 w1) ]> ==> <[ <{w2}> | empty nil ]> ->
             w_value w2 ->
-            <[ id | sigma | env | <{mult w0 w1}> ]>  ==> <[ <{w2}> | empty nil ]> 
-  
+            <[ id | sigma | env | <{app mult $ w0 w1 $}> ]>  ==> <[ <{w2}> | empty nil ]> 
+
+  | A_OR : forall (id:ident) (sigma:sensor_state) (env:value_tree_env) (w0:nvalue) (w1:nvalue)  (w2:nvalue) ,
+            w_value w0 ->
+            w_value w1 ->
+            <[ id | sigma | env | (pointWise l_or w0 w1) ]> ==> <[ <{w2}> | empty nil ]> ->
+            w_value w2 ->
+            <[ id | sigma | env | <{app b_or $ w0 w1 $}> ]>  ==> <[ <{w2}> | empty nil ]> 
+
+  | A_AND: forall (id:ident) (sigma:sensor_state) (env:value_tree_env) (w0:nvalue) (w1:nvalue)  (w2:nvalue) ,
+            w_value w0 ->
+            w_value w1 ->
+            <[ id | sigma | env | (pointWise l_and w0 w1) ]> ==> <[ <{w2}> | empty nil ]> ->
+            w_value w2 ->
+            <[ id | sigma | env | <{app b_and $ w0 w1 $}> ]>  ==> <[ <{w2}> | empty nil ]> 
+
   | A_FOLD : forall (id:ident) (sigma:sensor_state) (env:value_tree_env) (w1:nvalue) (w2:nvalue) (w3:nvalue) (l:literal) (theta:value_tree),
             w_value w1 ->
             w_value w2 ->
             w_value w3 ->
-            value l ->
             <[ id | sigma | vt_end | folding id (rev (devices env)) w1 w2 w3 ]> ==> <[ <{[>l]}> | theta ]>   ->
-            <[ id | sigma | env | <{nfold w1 w2 w3}> ]>  ==> <[ <{[>l]}> | empty nil ]> 
+            value l ->
+            <[ id | sigma | env | <{app nfold $ w1 w2 w3 $}> ]>  ==> <[ <{[>l]}> | empty nil ]> 
 
   | A_EXCHANGE : forall (id:ident) (sigma:sensor_state) (env:value_tree_env) (theta:value_tree)
                  (w_i:nvalue) (w_f:nvalue) (w_r:nvalue),
             w_value w_i -> 
             w_value w_f ->
-            w_value w_r ->
-            <[ id | sigma | pi_env 0 env  | exp_app w_f (get_messages id w_i env) ]> ==> <[ <{w_r}> | theta ]> ->
-            <[ id | sigma | env | <{exchange w_i w_f}> ]>  ==> <[ <{w_r}> | some w_r (cons theta nil) ]> 
+            <[ id | sigma | pi_env 0 env  | exp_app_1 w_f (get_messages id w_i env) ]> ==> <[ <{w_r}> | theta ]> ->
+            w_value w_r ->            
+            <[ id | sigma | env | <{app exchange $w_i w_f$}> ]>  ==> <[ <{w_r}> | some w_r (cons theta nil) ]> 
  
 where "t '==>' t'" := (bigstep t t').
-
-
-
-
 
 
 
