@@ -89,15 +89,16 @@ simpl;auto;
 end
 )
 | eapply A_MULT;idtac "MULT"
-| eapply A_SELF;idtac "SELF"
+
 | eapply A_UID;idtac "UID"
 | eapply A_FOLD;idtac "FOLD"
+| eapply A_SELF;idtac "SELF"
 | eapply A_EXCHANGE;idtac "EXCHANGE"
-| eapply A_OR;idtac "EXCHANGE"
-| eapply A_AND;idtac "EXCHANGE"
+| eapply A_OR;idtac "OR"
+| eapply A_AND;idtac "OR"
 
 | eapply E_NVAL;idtac "NVAL"
-| eapply A_SENS;idtac "LIT"
+| eapply A_SENS;idtac "SENS"
 | eapply E_LIT;idtac "LIT"
 | eapply E_VAR;idtac "VAR"
 
@@ -107,7 +108,9 @@ end
 | eapply E_APP_2;idtac "APP_2"
 | eapply E_APP;idtac "APP"
 
-| eapply A_SENS;idtac "SENS"
+
+
+| eapply A_SELF;idtac "SELF"
 
 ]).
 
@@ -164,7 +167,7 @@ Proof.
 try sens_tac.
 Abort.
 
-Lemma self: <[10 | base | vt_end | <{app self $([10>>5][>6])$}> ]> ==> <[ <{5}> | empty nil  ]>.
+Lemma self: <[10 | base | vt_end | <{app self $([10>>5][>6])$}> ]> ==> <[ <{[>5]}> | empty nil  ]>.
 Proof.
 self_tac.
 Qed.

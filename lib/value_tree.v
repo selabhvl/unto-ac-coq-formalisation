@@ -49,8 +49,19 @@ end.
 Definition name_f (e:exp): option string :=
 match e with
 | <{fun n[x] {m}}> => Some n
+| <{exchange}> => Some "exchange"%string
+| <{nfold}> => Some "nfold"%string
+| <{self}> => Some "self"%string
+| <{uid}> => Some "uid"%string
+| <{succ}> => Some "succ"%string
+| <{pred}> => Some "pred"%string
+| <{mult}> => Some "mult"%string
+| <{b_or}> => Some "b_or"%string
+| <{b_and}> => Some "b_and"%string
 | _ => None
 end.
+
+
 
 Fixpoint select_f (v_env:value_tree_env) (e:exp) : value_tree_env :=
 match v_env with

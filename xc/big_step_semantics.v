@@ -84,9 +84,9 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
             is_fun f ->  
             <[ id | sigma | pi_env 1 env  | <{e1}> ]> ==> <[ <{w1}> | theta1 ]> ->
             w_value w1 ->
-            <[ id | sigma | pi_env 1 env  | <{e2}> ]> ==> <[ <{w2}> | theta2 ]> ->
+            <[ id | sigma | pi_env 2 env  | <{e2}> ]> ==> <[ <{w2}> | theta2 ]> ->
             w_value w2 ->
-            <[ id | sigma | pi_env 2 (select_f env f)  | <{app f $ w1 w2 $}> ]> ==> <[ <{w3}> | theta3 ]> ->
+            <[ id | sigma | pi_env 3 (select_f env f)  | <{app f $ w1 w2 $}> ]> ==> <[ <{w3}> | theta3 ]> ->
             w_value w3 -> 
             <[ id | sigma | env | <{app e0 $e1 e2$}> ]> ==> <[ <{w3}> | some <{[>f]}> (cons theta0 (cons theta1 (cons theta2 (cons theta3 nil)))) ]>  
 
@@ -99,11 +99,11 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
             is_fun f ->  
             <[ id | sigma | pi_env 1 env  | <{e1}> ]> ==> <[ <{w1}> | theta1 ]> ->
             w_value w1 ->
-            <[ id | sigma | pi_env 1 env  | <{e2}> ]> ==> <[ <{w2}> | theta2 ]> ->
+            <[ id | sigma | pi_env 2 env  | <{e2}> ]> ==> <[ <{w2}> | theta2 ]> ->
             w_value w2 ->
-            <[ id | sigma | pi_env 1 env  | <{e3}> ]> ==> <[ <{w3}> | theta3 ]> ->
+            <[ id | sigma | pi_env 3 env  | <{e3}> ]> ==> <[ <{w3}> | theta3 ]> ->
             w_value w3 ->
-            <[ id | sigma | pi_env 2 (select_f env f)  | <{app f $w1 w2 w3$}> ]> ==> <[ <{w4}> | theta4 ]> ->
+            <[ id | sigma | pi_env 4 (select_f env f)  | <{app f $w1 w2 w3$}> ]> ==> <[ <{w4}> | theta4 ]> ->
             w_value w4 -> 
             <[ id | sigma | env | <{app e0 $e1 e2 e3$}> ]> ==> <[ <{w4}> | some <{[>f]}> (cons theta0 (cons theta1 (cons theta2 (cons theta3 (cons theta4 nil))))) ]>  
 
@@ -122,7 +122,7 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
   | A_SELF :  forall (id:ident) (sigma:sensor_state) (env:value_tree_env) (w:nvalue) (l:literal),
             w_value w ->
             l = nvalues.get id w ->
-            <[ id | sigma | env | <{app self $ w $}> ]> ==> <[ <{l}> | empty nil ]> 
+            <[ id | sigma | env | <{app self $ w $}> ]> ==> <[ <{[>l]}> | empty nil ]> 
 
   | A_UID :  forall (id:ident) (sigma:sensor_state) (env:value_tree_env),
             <[ id | sigma | env | <{uid}> ]> ==> <[ <{id}> | empty nil ]> 
@@ -164,7 +164,7 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
             w_value w_r ->            
             <[ id | sigma | env | <{app exchange $w_i w_f$}> ]>  ==> <[ <{w_r}> | some w_r (cons theta nil) ]> 
  
-where "t '==>' t'" := (bigstep t t').
+where "t '==>' t'" := (bigstep t t'). 
 
 
 
