@@ -123,7 +123,7 @@ netI (aes (nil) n_R n_d n_s) e_main |=> netO nil nil
 
 netI (aes next n_R n_d n_s) e_main |=> netO next_stv next_vts
 
-Some vt_env = before_event_option ev next n_R next_vts n_d  
+->Some vt_env = before_event_option ev next n_R next_vts n_d  
 
 -> <[ n_d ev | n_s ev | (before_event ev next n_R next_vts n_d) | e_main ]> ==> <[ w |  vt ]> 
 
