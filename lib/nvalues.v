@@ -22,17 +22,6 @@ Inductive ordered :nvalue -> Prop :=
 | ordered2 : forall a0 a1 m b0 b1, lt a0 a1 -> ordered (device a1 b1 m) -> ordered ((device a0 b0 (device a1 b1 m))).
 
 
-Fixpoint pointWise (op:literal -> literal -> literal) (w0:nvalue) {struct w0}: nvalue -> nvalue:=
-fix pointWise1 (w1:nvalue) {struct w1}: nvalue :=
-match w0,w1 with
-| default x , default y => default (op x y)
-| default x , device a b m  =>  device a (op x b) (pointWise1 m) 
-| device a b m , default x  => device a (op x b) (pointWise op  m (default x)) 
-| device a0 b0 m0 , device a1 b1 m1  => if (a0=?a1) then device a0 (op b0 b1) (pointWise op m0 m1)
-                                            else (if (a0<?a1) then device a0 (op b0 (getDefault m1)) (pointWise op m0 (device a1 b1 m1))
-                                            else device a1 (op (getDefault m0) b1) (pointWise1 m1 ))
-end.
-
 Fixpoint extend (w0:nvalue) {struct w0}: nvalue -> nvalue:=
 fix extend1 (w1:nvalue) {struct w1}: nvalue :=
 match w0,w1 with
@@ -44,9 +33,29 @@ match w0,w1 with
                                             else device a1 (getDefault w0) (extend1 m1))
 end. 
 
+Fixpoint pointWise (op:literal -> literal -> literal) (w0:nvalue) {struct w0}: nvalue -> nvalue:=
+fix pointWise1 (w1:nvalue) {struct w1}: nvalue :=
+match w0,w1 with
+| default x , default y => default (op x y)
+| default x , device a b m  =>  device a (op x b) (pointWise1 m) 
+| device a b m , default x  => device a (op x b) (pointWise op  m (default x)) 
+| device a0 b0 m0 , device a1 b1 m1  => if (a0=?a1) then device a0 (op b0 b1) (pointWise op m0 m1)
+                                            else (if (a0<?a1) then device a0 (op b0 (getDefault m1)) (pointWise op m0 (device a1 b1 m1))
+                                            else device a1 (op (getDefault m0) b1) (pointWise1 m1 ))
+end.
+
+Definition isBuiltin (id:ident) (w:nvalue) := 
+match (nvalues.get id w) with
+| l_builtin b=> true
+| _ => false
+end.
+
 Fixpoint folding (delta:ident) (devs:list nat) (w1:nvalue) (w2:nvalue) (w3:nvalue) : exp :=
 match devs with 
-| cons id l => if (delta =? id) then (folding id l w1 w2 w3) else exp_app_1 (exp_app_1 w1 (nvalues.get id w2)) (folding delta l w1 w2 w3)
+| cons id l => if (delta =? id) then (folding id l w1 w2 w3) else 
+                          (if (isBuiltin delta w1) 
+                           then exp_app_2 w1 (nvalues.get id w2) (folding delta l w1 w2 w3) 
+                           else exp_app_1 (exp_app_1 w1 (nvalues.get id w2)) (folding delta l w1 w2 w3) )
 | nil => (get delta w3)
 end.
 

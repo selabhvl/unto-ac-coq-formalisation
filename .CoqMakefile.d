@@ -16,12 +16,12 @@ lib/sensor_state.vos lib/sensor_state.vok lib/sensor_state.required_vos: lib/sen
 xc/big_step_semantics.vo xc/big_step_semantics.glob xc/big_step_semantics.v.beautified xc/big_step_semantics.required_vo: xc/big_step_semantics.v xc/syntax.vo lib/basics.vo lib/sensor_state.vo lib/value_tree.vo lib/nvalues.vo
 xc/big_step_semantics.vio: xc/big_step_semantics.v xc/syntax.vio lib/basics.vio lib/sensor_state.vio lib/value_tree.vio lib/nvalues.vio
 xc/big_step_semantics.vos xc/big_step_semantics.vok xc/big_step_semantics.required_vos: xc/big_step_semantics.v xc/syntax.vos lib/basics.vos lib/sensor_state.vos lib/value_tree.vos lib/nvalues.vos
-xc/network_semantics.vo xc/network_semantics.glob xc/network_semantics.v.beautified xc/network_semantics.required_vo: xc/network_semantics.v xc/syntax.vo lib/basics.vo lib/sensor_state.vo lib/value_tree.vo lib/nvalues.vo xc/big_step_semantics.vo xc/tactics.vo
-xc/network_semantics.vio: xc/network_semantics.v xc/syntax.vio lib/basics.vio lib/sensor_state.vio lib/value_tree.vio lib/nvalues.vio xc/big_step_semantics.vio xc/tactics.vio
-xc/network_semantics.vos xc/network_semantics.vok xc/network_semantics.required_vos: xc/network_semantics.v xc/syntax.vos lib/basics.vos lib/sensor_state.vos lib/value_tree.vos lib/nvalues.vos xc/big_step_semantics.vos xc/tactics.vos
-xc/tactics.vo xc/tactics.glob xc/tactics.v.beautified xc/tactics.required_vo: xc/tactics.v xc/syntax.vo lib/basics.vo lib/sensor_state.vo lib/value_tree.vo lib/nvalues.vo xc/big_step_semantics.vo
-xc/tactics.vio: xc/tactics.v xc/syntax.vio lib/basics.vio lib/sensor_state.vio lib/value_tree.vio lib/nvalues.vio xc/big_step_semantics.vio
-xc/tactics.vos xc/tactics.vok xc/tactics.required_vos: xc/tactics.v xc/syntax.vos lib/basics.vos lib/sensor_state.vos lib/value_tree.vos lib/nvalues.vos xc/big_step_semantics.vos
+xc/network_semantics.vo xc/network_semantics.glob xc/network_semantics.v.beautified xc/network_semantics.required_vo: xc/network_semantics.v xc/syntax.vo lib/basics.vo lib/sensor_state.vo lib/value_tree.vo lib/nvalues.vo xc/big_step_semantics.vo
+xc/network_semantics.vio: xc/network_semantics.v xc/syntax.vio lib/basics.vio lib/sensor_state.vio lib/value_tree.vio lib/nvalues.vio xc/big_step_semantics.vio
+xc/network_semantics.vos xc/network_semantics.vok xc/network_semantics.required_vos: xc/network_semantics.v xc/syntax.vos lib/basics.vos lib/sensor_state.vos lib/value_tree.vos lib/nvalues.vos xc/big_step_semantics.vos
+xc/tactics.vo xc/tactics.glob xc/tactics.v.beautified xc/tactics.required_vo: xc/tactics.v xc/syntax.vo lib/basics.vo lib/sensor_state.vo lib/value_tree.vo lib/nvalues.vo xc/big_step_semantics.vo xc/network_semantics.vo
+xc/tactics.vio: xc/tactics.v xc/syntax.vio lib/basics.vio lib/sensor_state.vio lib/value_tree.vio lib/nvalues.vio xc/big_step_semantics.vio xc/network_semantics.vio
+xc/tactics.vos xc/tactics.vok xc/tactics.required_vos: xc/tactics.v xc/syntax.vos lib/basics.vos lib/sensor_state.vos lib/value_tree.vos lib/nvalues.vos xc/big_step_semantics.vos xc/network_semantics.vos
 test/basics_test.vo test/basics_test.glob test/basics_test.v.beautified test/basics_test.required_vo: test/basics_test.v lib/basics.vo lib/nvalues.vo xc/syntax.vo
 test/basics_test.vio: test/basics_test.v lib/basics.vio lib/nvalues.vio xc/syntax.vio
 test/basics_test.vos test/basics_test.vok test/basics_test.required_vos: test/basics_test.v lib/basics.vos lib/nvalues.vos xc/syntax.vos

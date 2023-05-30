@@ -10,19 +10,18 @@ Require Import PeanoNat.
 
 
 Inductive conf_in: Type := Input : ident -> sensor_state -> value_tree_env -> exp -> conf_in.
-Inductive conf_out: Type := Output : exp -> value_tree -> conf_out.
+Inductive conf_out: Type := Output : nvalue -> value_tree -> conf_out.
 
 Notation "<[ id | s | v_env |  ex  ]>" := (Input id s v_env ex).
+Notation "<[ w | theta ]>" := (Output w theta).
 
-Notation "<[ ex | theta ]>" := (Output ex theta).
-
-Definition l_prod (l0:literal) (l1:literal): literal :=
+Definition op_prod (l0:literal) (l1:literal): literal :=
 match l0,l1 with
 | l_const x, l_const y => l_const (x * y)
 | _ , _ => l_fail
 end.
 
-Definition l_or (l0:literal) (l1:literal): literal :=
+Definition op_or (l0:literal) (l1:literal): literal :=
 match l0,l1 with
 | l_false, l_false=> l_false
 | l_true, l_false=> l_true
@@ -31,7 +30,7 @@ match l0,l1 with
 | _ , _ => l_fail
 end.
 
-Definition l_and (l0:literal) (l1:literal): literal :=
+Definition op_and (l0:literal) (l1:literal): literal :=
 match l0,l1 with
 | l_false, l_false=> l_false
 | l_true, l_false=> l_false
@@ -40,7 +39,7 @@ match l0,l1 with
 | _ , _ => l_fail
 end.
 
-
+ 
 Reserved Notation "t '==>' t'" (at level 40).
 Inductive bigstep : conf_in -> conf_out -> Prop :=
 
@@ -58,10 +57,10 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
 
   | E_VAL: forall (id:ident) (sigma:sensor_state) (env:value_tree_env)
             x (w1:nvalue) (w2:nvalue) e1 e2 (theta1:value_tree) (theta2:value_tree), 
-            w_value w1 ->
-            w_value w2 ->
             <[ id | sigma | pi_env 0 env | <{e1}> ]> ==> <[ <{w1}> | theta1 ]> ->
+            w_value w1 ->
             <[ id | sigma | pi_env 1 env | <{/x := w1/ e2 }> ]>  ==> <[ <{w2}> | theta2 ]> ->
+            w_value w2 ->
             <[ id | sigma | env | <{val x = e1 ; e2}> ]>  ==> <[ <{w2}> | empty (cons theta1 (cons theta2 nil)) ]> 
 
   | E_APP : forall (id:ident) (sigma:sensor_state) (env:value_tree_env) 
@@ -125,26 +124,26 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
             <[ id | sigma | env | <{app self $ w $}> ]> ==> <[ <{[>l]}> | empty nil ]> 
 
   | A_UID :  forall (id:ident) (sigma:sensor_state) (env:value_tree_env),
-            <[ id | sigma | env | <{uid}> ]> ==> <[ <{id}> | empty nil ]> 
+            <[ id | sigma | env | <{uid}> ]> ==> <[ <{[>id]}> | empty nil ]> 
 
   | A_MULT : forall (id:ident) (sigma:sensor_state) (env:value_tree_env) (w0:nvalue) (w1:nvalue)  (w2:nvalue) ,
             w_value w0 ->
             w_value w1 ->
-            <[ id | sigma | env | (pointWise l_prod w0 w1) ]> ==> <[ <{w2}> | empty nil ]> ->
+            w2=(pointWise op_prod w0 w1) ->
             w_value w2 ->
             <[ id | sigma | env | <{app mult $ w0 w1 $}> ]>  ==> <[ <{w2}> | empty nil ]> 
 
   | A_OR : forall (id:ident) (sigma:sensor_state) (env:value_tree_env) (w0:nvalue) (w1:nvalue)  (w2:nvalue) ,
             w_value w0 ->
             w_value w1 ->
-            <[ id | sigma | env | (pointWise l_or w0 w1) ]> ==> <[ <{w2}> | empty nil ]> ->
+            w2=(pointWise op_or w0 w1) ->
             w_value w2 ->
             <[ id | sigma | env | <{app b_or $ w0 w1 $}> ]>  ==> <[ <{w2}> | empty nil ]> 
 
   | A_AND: forall (id:ident) (sigma:sensor_state) (env:value_tree_env) (w0:nvalue) (w1:nvalue)  (w2:nvalue) ,
             w_value w0 ->
             w_value w1 ->
-            <[ id | sigma | env | (pointWise l_and w0 w1) ]> ==> <[ <{w2}> | empty nil ]> ->
+            w2=(pointWise op_and w0 w1) ->
             w_value w2 ->
             <[ id | sigma | env | <{app b_and $ w0 w1 $}> ]>  ==> <[ <{w2}> | empty nil ]> 
 
@@ -152,7 +151,7 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
             w_value w1 ->
             w_value w2 ->
             w_value w3 ->
-            <[ id | sigma | vt_end | folding id (rev (devices env)) w1 w2 w3 ]> ==> <[ <{[>l]}> | theta ]>   ->
+            <[ id | sigma | vt_end | folding id (rev (devices env)) w1 w2 w3 ]> ==> <[ <{[>l]}> | theta ]> -> 
             value l ->
             <[ id | sigma | env | <{app nfold $ w1 w2 w3 $}> ]>  ==> <[ <{[>l]}> | empty nil ]> 
 
@@ -165,7 +164,7 @@ Inductive bigstep : conf_in -> conf_out -> Prop :=
             <[ id | sigma | env | <{app exchange $w_i w_f$}> ]>  ==> <[ <{w_r}> | some w_r (cons theta nil) ]> 
  
 where "t '==>' t'" := (bigstep t t'). 
-
+ 
 
 
 

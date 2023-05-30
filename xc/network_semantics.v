@@ -4,7 +4,6 @@ From AC Require Import sensor_state.
 From AC Require Import value_tree.
 From AC Require Import nvalues.
 From AC Require Import big_step_semantics.
-From AC Require Import tactics.
 Require Import Bool.
 Require Import String.
 Require Import List.
@@ -48,7 +47,7 @@ Definition add_d (new_e:event) (new_d:ident) (old:d_net): d_net :=(fun e => if (
 (*A s_net is a function that maps a event to a sensor_state*)
 Definition s_net := event -> sensor_state.
 (*The returned value if a searched event doesn't exists*)
-Definition base_s (e:event) := base.
+Definition base_s (e:event) := base_sens.
 (*Add a event to a s_net, with respective sensor_state*)
 Definition add_s (new_e:event) (new_s:sensor_state) (old:s_net): s_net :=(fun e => if (equalsEv e new_e) then new_s else (old e)).
 
@@ -123,9 +122,9 @@ netI (aes (nil) n_R n_d n_s) e_main |=> netO nil nil
 
 netI (aes next n_R n_d n_s) e_main |=> netO next_stv next_vts
 
-->Some vt_env = before_event_option ev next n_R next_vts n_d  
+-> vt_env = before_event ev next n_R next_vts n_d 
 
--> <[ n_d ev | n_s ev | (before_event ev next n_R next_vts n_d) | e_main ]> ==> <[ w |  vt ]> 
+-> <[ n_d ev | n_s ev | vt_env | e_main ]> ==> <[ w |  vt ]> 
 
 -> netI (aes (cons ev next) n_R n_d n_s) e_main |=> netO (cons (net_w_el ev w) next_stv)  (cons (net_vt_el ev vt) next_vts) 
 

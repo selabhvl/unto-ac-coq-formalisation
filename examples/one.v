@@ -31,22 +31,22 @@ Definition deviceMap (e:event): nat :=  match e with | (e id n) => id end.
 
 Definition sensorMap (ev:event): sensor_state := 
 match ev with 
-| e 0 0 => add f1 <{[>false]}> (add f2 <{[>true]}> base)
-| e 1 0 => add f1 <{[>true]}> (add f2 <{[>false]}> base)
-| e 2 0 => add f1 <{[>false]}> (add f2 <{[>true]}> base)
-| e 1 1 => add f1 <{[>true]}> (add f2 <{[>false]}> base)
-| e 1 _ => add f1 <{[>false]}> (add f2 <{[>false]}> base)
-| e _ _ => add f1 <{[>true]}> (add f2 <{[>false]}> base)
+| e 0 0 => add_sens f1 <{[>false]}> (add_sens f2 <{[>true]}> base_sens)
+| e 1 0 => add_sens f1 <{[>true]}> (add_sens f2 <{[>false]}> base_sens)
+| e 2 0 => add_sens f1 <{[>false]}> (add_sens f2 <{[>true]}> base_sens)
+| e 1 1 => add_sens f1 <{[>true]}> (add_sens f2 <{[>false]}> base_sens)
+| e 1 _ => add_sens f1 <{[>false]}> (add_sens f2 <{[>false]}> base_sens)
+| e _ _ => add_sens f1 <{[>true]}> (add_sens f2 <{[>false]}> base_sens)
 end.
 
 Definition exp_main: exp := 
-<{app exchange $(false) (fun fun_ex[old] {app b_or $(sensor f2) (app b_and $(sensor f1) (app nfold $ (fun fun_or_x[x] {fun fun_or_y[y] {app b_or $x y$} }) (old) (old)$)$ )$ }) $ }> .
+<{app exchange $(false) (fun fun_ex[old] {app b_or $(sensor f2) (app b_and $(sensor f1) (app nfold $ (b_or) (old) (old)$)$ )$ }) $ }> .
 
 
 Definition test_exp_main: exists a b, <[ 0 | sensorMap (e 0 0) | vt_end | exp_main ]> ==>
 <[ a | b ]>.
 Proof. 
-eexists. eexists.  unfold exp_main. device_tac.
+eexists. eexists.  unfold exp_main. device_tac. 
 Qed.
 
 
@@ -98,23 +98,13 @@ match es_E with
 end.
 
 
-Lemma one_lemma : exists (stv:STV) (vts:vt_net) , 
+Lemma example_lemma : exists (stv:STV) (vts:vt_net) , 
 stv = (aes_formula (ES (Sensor "f1"%string) (Sensor "f2"%string)) eventList messageList deviceMap sensorMap)  /\ 
 netI (aes eventList messageList deviceMap sensorMap) <{exp_main}> |=> netO stv vts.
 Proof.
-eexists. eexists. split.
-- simpl. auto. 
-- repeat eapply E_NET_R. eapply E_NET_0. 
-1-2:[>reflexivity|device_tac]. 
-1-2:[>reflexivity|device_tac].
-1-2:[>reflexivity|device_tac].
-1-2:[>reflexivity|device_tac].
-1-2:[>reflexivity|device_tac]. 
-1-2:[>reflexivity|device_tac].
-1-2:[>reflexivity|device_tac].
-1-2:[>reflexivity|device_tac].
-1-2:[>reflexivity|device_tac].
+eexists. eexists. split.  
+- simpl. auto.
+- net_tac.
 Qed.
-
 
 

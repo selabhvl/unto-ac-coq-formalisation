@@ -85,6 +85,8 @@ match v_env with
                             end
 | v_end => default (nvalues.getDefault w_i)
 end.
+
+
 (* Se dentro a un nvalue di un value_tree non è presente 
 il valore per il nostro dispositivo è sufficiente il default? *)
 

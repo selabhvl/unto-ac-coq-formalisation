@@ -33,15 +33,15 @@ where "'/' x ':=' s '/' t" := (subst x s t) (in custom acnotation).
 
 
 (*Recursive on nvalues*)
-Fixpoint bounded (e:exp) (l_bounded:list string) {struct e}: Prop :=
+Fixpoint well_formed (e:exp) (l_bounded:list string) {struct e}: Prop :=
 let l_b := 
   (fix l_b (l : literal) : Prop := 
         match l with
         | l_builtin b => True
         | <{fun n [y] {t1}}> => 
-              bounded t1 (cons y l_bounded)
+              well_formed t1 (cons y l_bounded)
         | l_sensor s => True
-        | l_fail => True
+        | l_fail => False (*A expression with fail is not well formed*)
         | l_true => True
         | l_false => True
         | l_const n => True
@@ -52,15 +52,15 @@ match e with
   | exp_var y =>
     In y l_bounded
   | <{app t1 $ t2 $}> =>
-    (bounded t1 l_bounded) /\ (bounded t2 l_bounded)
+    (well_formed t1 l_bounded) /\ (well_formed t2 l_bounded)
   | <{app t1 $ t2 t3 $}> =>
-    (bounded t1 l_bounded) /\ (bounded t2 l_bounded) /\ (bounded t3 l_bounded)
+    (well_formed t1 l_bounded) /\ (well_formed t2 l_bounded) /\ (well_formed t3 l_bounded)
   | <{app t1 $ t2 t3 t4 $}> =>
-    (bounded t1 l_bounded) /\ (bounded t2 l_bounded) /\ (bounded t3 l_bounded) /\ (bounded t4 l_bounded)
+    (well_formed t1 l_bounded) /\ (well_formed t2 l_bounded) /\ (well_formed t3 l_bounded) /\ (well_formed t4 l_bounded)
   | <{val n = t1 ; t2}> =>
-    (bounded t1 l_bounded) /\ (bounded t2 (cons n l_bounded))
+    (well_formed t1 l_bounded) /\ (well_formed t2 (cons n l_bounded))
   | <{fun n [y] {t1}}> =>
-    bounded t1 (cons y l_bounded)
+    well_formed t1 (cons y l_bounded)
   | exp_nvalue w =>
     (fix w_rec (w : nvalue ) : Prop := 
     match w with
@@ -76,9 +76,9 @@ Inductive w_values : nvalue -> Prop :=
 | w_device : forall n l wl, bounded (exp_literal l) nil -> w_values wl -> w_values (device n l wl).
 *)
 
-Definition value (l:literal) : Prop := bounded (exp_literal l) nil.
+Definition value (l:literal) : Prop := well_formed (exp_literal l) nil.
 
-Definition w_value (w:nvalue):= ordered w /\ bounded (exp_nvalue w) nil.
+Definition w_value (w:nvalue):= ordered w /\ well_formed w nil.
 
 Inductive is_fun: exp -> Prop :=
   | func : forall n x t1, 

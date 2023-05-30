@@ -98,12 +98,11 @@ Notation "'sensor' x" := (l_sensor x) (in custom acnotation at level 0, x custom
 
 
 Coercion exp_var : string >-> exp.
-Coercion l_builtin : builtin >-> literal.
 Coercion exp_literal: literal >-> exp.
-Coercion l_const: nat >-> literal.
 Coercion exp_nvalue: nvalue >-> exp.
+Coercion l_builtin : builtin >-> literal.
+Coercion l_const: nat >-> literal.
 
-Check <{app [>5] $ [>5] [>5] $ }>.
 
 
 
