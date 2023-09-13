@@ -108,6 +108,11 @@ eexists. eexists. split.
 - simpl. auto.
 - net_tac.
 Qed.
+
+Lemma second_lemma : exists (stv:STV) (vts:vt_net) , 
+stv = (aes_formula (ES (Sensor "f1"%string) (Sensor "f2"%string)) eventList messageList deviceMap sensorMap)  /\ 
+netI (aes eventList messageList deviceMap sensorMap) <{exp_main}> |=> netO stv vts.
+Proof.
  
 
 

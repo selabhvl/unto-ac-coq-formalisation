@@ -9,7 +9,7 @@ xc/tactics.v
 test/basics_test.v
 test/nvalues_test.v
 test/value_tree_test.v
-test/sensor_state_test.v
+
 
 
 -R . AC

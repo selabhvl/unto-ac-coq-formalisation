@@ -17,10 +17,10 @@ Definition s0:string := "s0".
 Definition s1:string := "s1".
 Definition fun0:string := "fun0".
 
-(*ordered*)
+(*Automaticaly check if nvalues is ordered*)
 Ltac ordered_tac := solve [apply ordered0 | apply ordered1 | apply ordered2;auto;ordered_tac].
 
-(*w_value*)
+(*Automaticali check *)
 Ltac w_tac := solve [split; [>ordered_tac | simpl;repeat split;auto]].
 
 (*E-NVAL*)

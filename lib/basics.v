@@ -4,8 +4,9 @@ Require Import List.
 From AC Require Import syntax.
 From AC Require Import nvalues.
 
-
-(*Not recursive on nvalues*)
+(* Substitution operations:
+Takes in input the variable to replace, the value replaced and the involved expression 
+Returns the resulting expression with all the unbounded variables replaced *)
 Reserved Notation "'/' x ':=' s '/' t" (in custom acnotation at level 20, x constr).
 Fixpoint subst (x : string) (s : exp) (t : exp) : exp :=
   match t with
@@ -32,7 +33,10 @@ end
 where "'/' x ':=' s '/' t" := (subst x s t) (in custom acnotation).
 
 
-(*Recursive on nvalues*)
+(* Check if an expression is bounded and doesn't contains FAIL, 
+Takes in input the expression to check and a list of variable that are already bounded
+Return a proposition that can proved
+The expression isn't well formed if contains a FAIL*)
 Fixpoint well_formed (e:exp) (l_bounded:list string) {struct e}: Prop :=
 let l_b := 
   (fix l_b (l : literal) : Prop := 
@@ -70,16 +74,13 @@ match e with
   | exp_literal l => l_b l
 end.
 
-(*
-Inductive w_values : nvalue -> Prop :=
-| w_default : forall l, bounded (exp_literal l) nil-> w_values (default l)
-| w_device : forall n l wl, bounded (exp_literal l) nil -> w_values wl -> w_values (device n l wl).
-*)
-
+(*A value is a well formed literal*)
 Definition value (l:literal) : Prop := well_formed (exp_literal l) nil.
 
+(*A nvalue is well formed if it's ordered contains valid values*)
 Definition w_value (w:nvalue):= ordered w /\ well_formed w nil.
 
+(*Proposition that check if a expression is a function*)
 Inductive is_fun: exp -> Prop :=
   | func : forall n x t1, 
       is_fun <{fun n [x] {t1}}>

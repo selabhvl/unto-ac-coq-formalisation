@@ -97,6 +97,7 @@ Notation "'FAIL'" := (l_fail) (in custom acnotation at level 0).
 Notation "'sensor' x" := (l_sensor x) (in custom acnotation at level 0, x custom acnotation at level 0).
 
 
+(** Strings,literals and nvalues are automaticaly considered as expressions*)
 Coercion exp_var : string >-> exp.
 Coercion exp_literal: literal >-> exp.
 Coercion exp_nvalue: nvalue >-> exp.

@@ -4,23 +4,26 @@ Require Import PeanoNat.
 Require Import List. 
 Require Import nvalues.
 
+(** Value tree is formalized as a tree that can contain a nvalue as root value*)
 Inductive value_tree: Type :=
 | empty : list value_tree -> value_tree
 | some : nvalue -> list value_tree  -> value_tree.
 
+(** Return the value in the root if exists*)
 Definition rho (v:value_tree) : option nvalue :=
 match v with 
 | empty _ => None
 | some w _ => Some w
 end.
 
+(** Return the childs of a value tree*)
 Definition extract_l (v:value_tree) : list value_tree:= 
 match v with 
 | empty l => l
 | some _ l => l
 end.
 
-(*return empty value_tree if pos dowsn't exists*)
+(** Return the child in position 'pos' if exists, empty nill otherwise*)
 Fixpoint pi (pos:nat) (v:value_tree): value_tree :=
 let ll := extract_l v in 
 match pos , ll with
@@ -30,22 +33,26 @@ match pos , ll with
 | 0 , (nill) => empty nill
 end.
 
+(** Inductive definition of value tree environment*)
 Inductive value_tree_env: Type := 
 | vt_el (id:ident) (v1:value_tree) : value_tree_env -> value_tree_env
 | vt_end : value_tree_env.
 
+(** Function pi applied to all elements of an environment*)
 Fixpoint pi_env (pos:nat) (v_env:value_tree_env): value_tree_env :=
 match v_env with
 | (vt_end) => vt_end
 | (vt_el id vt vt_next) => vt_el id (pi pos vt) (pi_env pos vt_next)
 end.  
 
+(** Returns the device involved in an environment*)
 Fixpoint devices (env:value_tree_env) : list nat :=
 match env with 
 | vt_el id _  vl => cons id (devices vl)
 | vt_end => nil
 end.
 
+(** Return the name of a function*)
 Definition name_f (e:exp): option string :=
 match e with
 | <{fun n[x] {m}}> => Some n
@@ -62,7 +69,8 @@ match e with
 end.
 
 
-
+(** Select only the value trees of an environment
+that containt a certain function in the root*)
 Fixpoint select_f (v_env:value_tree_env) (e:exp) : value_tree_env :=
 match v_env with
 | vt_el id vt v_env_next => match (rho vt) with
@@ -77,6 +85,7 @@ match v_env with
 | vt_end => vt_end 
 end.
 
+(** Return the messages sended to a certain id in a vt env*)
 Fixpoint get_messages (my_id:ident) (w_i:nvalue) (v_env:value_tree_env) : nvalue :=
 match v_env with
 | vt_el id vt v_env_next => match (rho vt) with
@@ -85,18 +94,6 @@ match v_env with
                             end
 | v_end => default (nvalues.getDefault w_i)
 end.
-(* Se dentro a un nvalue di un value_tree non è presente 
-il valore per il nostro dispositivo è sufficiente il default? *)
-
-(*
-Compute (get_messages 2 <{[>5]}> (vt_el 3 (some <{[2>>5][>6]}> nil) 
-(vt_el 4 (some <{[1>>2][2>>6][>7]}> nil) (vt_el 7 (some <{[1>>2][2>>6][>7]}> nil) vt_end ) )  )).
-
-Compute (get_messages 2 <{[>5]}> (vt_el 3 (some <{[2>>5][>6]}> nil) 
-(vt_el 4 (some <{[1>>2][2>>6][>7]}> nil) (vt_el 7 (empty nil) vt_end ) )  )).
-*)
-
-
 
 
 

@@ -2,6 +2,7 @@ From AC Require Import syntax.
 Require Import String.
 Require Import Bool.
 
+(*Sensor state is formalized as a function*)
 Definition sensor_state := string -> nvalue.
 
 Definition base_sens (s:string) := default l_fail.

@@ -8,19 +8,22 @@ Require Import String.
 Require Import List.
 Require Import PeanoNat.
 
-
+(** Input configuration*)
 Inductive conf_in: Type := Input : ident -> sensor_state -> value_tree_env -> exp -> conf_in.
+(** Output configuration*)
 Inductive conf_out: Type := Output : nvalue -> value_tree -> conf_out.
 
 Notation "<[ id | s | v_env |  ex  ]>" := (Input id s v_env ex).
 Notation "<[ w | theta ]>" := (Output w theta).
 
+(** Product operation between literals*)
 Definition op_prod (l0:literal) (l1:literal): literal :=
 match l0,l1 with
 | l_const x, l_const y => l_const (x * y)
 | _ , _ => l_fail
 end.
 
+(** OR operation between literals*)
 Definition op_or (l0:literal) (l1:literal): literal :=
 match l0,l1 with
 | l_false, l_false=> l_false
@@ -30,6 +33,7 @@ match l0,l1 with
 | _ , _ => l_fail
 end.
 
+(** AND operation between literals*)
 Definition op_and (l0:literal) (l1:literal): literal :=
 match l0,l1 with
 | l_false, l_false=> l_false
@@ -39,7 +43,7 @@ match l0,l1 with
 | _ , _ => l_fail
 end.
 
- 
+(** Single device semantics*)
 Reserved Notation "t '==>' t'" (at level 40).
 Inductive bigstep : conf_in -> conf_out -> Prop :=
 

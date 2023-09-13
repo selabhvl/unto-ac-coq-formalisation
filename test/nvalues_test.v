@@ -33,11 +33,4 @@ Qed.
 Definition l_sum (x:literal) (y:literal) : literal := match x,y with | l_const x, l_const y => l_const (x+y) | _ , _ => l_fail end.
 Compute(pointWise l_sum (device  1 2(device  3 5(device  5 7(device  7 3(default  1))))) (device  2 2(device  4 5(device  6 7(device  7 3 (default  2)))))).
 
-Compute (extend (device 1 2 (device 5 4 (device 7 6 (default 8))))  
-(device 0 1 (device 1 3 (device 3 5 (device 4 7 (device 5 9 (device 6 11 ( device 8 13 ((default 6)))))))))).
-
-Compute (extend (device  1 2(device  3 5(device  5 7(device  7 3(default  1))))) (device  2 2 (device  4 5(device  6 7(device  7 3 (default  2)))))).
-
-Compute (extend (device  2 2(device  4 5(device  6 7(device  7 3(default  2)))))  (device  1 2(device  3 5(device  5 7(device  7 3 (default  1)))))).
-
-Compute (folding 4 (rev (devices (vt_el 4 (empty nil) (vt_el 5 (empty nil) vt_end)))) <{[ > fun fun0[x] {fun fun0[y] {mult x y} }]}>  <{[4 >> 2][5 >> 6][> 7]}> <{[>6]}> ).
+Compute (folding 4 (rev (devices (vt_el 4 (empty nil) (vt_el 5 (empty nil) vt_end)))) <{[ > fun fun0[x] {fun fun0[y] {app mult $x y$} }]}>  <{[4 >> 2][5 >> 6][> 7]}> <{[>6]}> ).

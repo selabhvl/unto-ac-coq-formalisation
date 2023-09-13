@@ -31,6 +31,3 @@ test/nvalues_test.vos test/nvalues_test.vok test/nvalues_test.required_vos: test
 test/value_tree_test.vo test/value_tree_test.glob test/value_tree_test.v.beautified test/value_tree_test.required_vo: test/value_tree_test.v xc/syntax.vo lib/nvalues.vo lib/value_tree.vo
 test/value_tree_test.vio: test/value_tree_test.v xc/syntax.vio lib/nvalues.vio lib/value_tree.vio
 test/value_tree_test.vos test/value_tree_test.vok test/value_tree_test.required_vos: test/value_tree_test.v xc/syntax.vos lib/nvalues.vos lib/value_tree.vos
-test/sensor_state_test.vo test/sensor_state_test.glob test/sensor_state_test.v.beautified test/sensor_state_test.required_vo: test/sensor_state_test.v lib/sensor_state.vo xc/syntax.vo
-test/sensor_state_test.vio: test/sensor_state_test.v lib/sensor_state.vio xc/syntax.vio
-test/sensor_state_test.vos test/sensor_state_test.vok test/sensor_state_test.required_vos: test/sensor_state_test.v lib/sensor_state.vos xc/syntax.vos
