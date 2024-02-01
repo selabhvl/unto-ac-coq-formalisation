@@ -1,3 +1,6 @@
+comp_cert/Coqlib.v
+comp_cert/Maps.v
+lib/mapping.v
 xc/syntax.v
 lib/basics.v
 lib/nvalues.v

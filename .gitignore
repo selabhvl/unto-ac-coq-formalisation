@@ -5,7 +5,9 @@
 /**/*.vos
 /**/*.aux
 
-
+.lia.cache
+.Makefile.d
+Makefile.conf
 
 
 
