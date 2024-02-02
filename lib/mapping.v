@@ -33,10 +33,9 @@ End MAPPING.
 *)
 
 Module Mapping (Map: MAP) (K: KEY_TYPE) <: MAPPING(K).
-  (* Module K := Key. *)
   Module M := IMap(K.IT).
   Module Key := K.IT.
-  Check K.into.
+
   Definition lookup {A : Type} (k : K.t) (map : M.t A) := M.get (K.into k) map.
   Definition place {A : Type} (k : K.t) (v : A) (map : M.t A) := M.set (K.into k) v map.
   Definition MapOf (A : Type) := M.t A.

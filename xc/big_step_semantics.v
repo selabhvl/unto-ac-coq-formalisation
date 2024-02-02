@@ -1,6 +1,5 @@
 From AC Require Import syntax.
 From AC Require Import basics.
-(* From AC Require Import sensor_state. *)
 From AC Require Import value_tree.
 From AC Require Import nvalues.
 Require Import Bool.
