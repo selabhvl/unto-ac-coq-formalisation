@@ -32,7 +32,7 @@ End MAPPING.
   Implemented modules
 *)
 
-Module Mapping (Map: MAP) (K: KEY_TYPE) <: MAPPING(K).
+Module Mapping (K: KEY_TYPE) <: MAPPING(K).
   Module M := IMap(K.IT).
   Module Key := K.IT.
 

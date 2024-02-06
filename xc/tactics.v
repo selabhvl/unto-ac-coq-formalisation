@@ -1,6 +1,6 @@
 From AC Require Import syntax.
 From AC Require Import basics.
-From AC Require Import sensor_state.
+(* From AC Require Import sensor_state. *)
 From AC Require Import value_tree.
 From AC Require Import nvalues.
 From AC Require Import big_step_semantics.
@@ -9,6 +9,11 @@ Require Import Bool.
 Require Import String.
 Require Import List.
 Require Import PeanoNat.
+
+Require Import Maps.
+Require Import mapping.
+
+Module Import NS := NetworkSemantics(Mapping).
 
 Definition x:string := "x".
 Definition y:string := "y".
