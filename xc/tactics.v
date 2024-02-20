@@ -13,7 +13,9 @@ Require Import PeanoNat.
 Require Import Maps.
 Require Import mapping.
 
+(* Module M := Mapping(StringKey). *)
 Module Import NS := NetworkSemantics(Mapping).
+Import NS.BS.
 
 Definition x:string := "x".
 Definition y:string := "y".
@@ -36,11 +38,12 @@ Ltac lit_tac := solve [apply E_LIT; unfold value; simpl; repeat split; auto].
 
 Ltac var_tac := 
 apply E_VAR;
-unfold base_sens; repeat (unfold add_sens); simpl;
-[(lazymatch goal with 
+(try apply StringMap.fetch; try symmetry; try apply StringMap.fetch);
+w_tac.
+(* [(lazymatch goal with 
 | [|- context [l_fail]]=> fail;idtac "No sensor"
 | _ => reflexivity;w_tac
-end)|w_tac].
+end)|w_tac]. *)
 
 Ltac mult_tac  := 
 solve [apply A_MULT;
@@ -68,13 +71,7 @@ end].
 
 Ltac fun_tac := eapply A_FUN; [>w_tac|simpl| try w_tac].
 
-Ltac sens_tac := 
-eapply A_SENS;
-unfold base_sens; repeat (unfold add_sens); simpl;
-[(lazymatch goal with 
-| [|- context [l_fail]]=> fail;idtac "No sensor"
-| _ => reflexivity;w_tac
-end)|w_tac].
+
 
 Ltac self_tac := apply A_SELF; [>w_tac|reflexivity].
 
@@ -135,28 +132,30 @@ repeat
 | _ => idtac "REC";eapply E_NET_R 
 end).
 
+Definition base_sens := StringMap.NewMap (default l_false).
+
 Lemma fdfsd: netI (aes (nil) nil base_d base_s) <{[>5]}> |=> netO nil nil.
 Proof.
 net_tac.
 Qed.
 
 
-Lemma val_ev: <[ 10 | base_sens | vt_end | <{val x=5 ; app mult $x [1>>2][>3]$ }> ]> ==> <[ <{[1>>10][>15]}> | empty (cons (empty nil) (cons (empty nil) nil))  ]>.
+Lemma val_ev: <[ 10 | StringMap.NewMap (default l_false) | vt_end | <{val x=5 ; app mult $x [1>>2][>3]$ }> ]> ==> <[ <{[1>>10][>15]}> | empty (cons (empty nil) (cons (empty nil) nil))  ]>.
 Proof.
 val_tac (<{[>5]}>). lit_tac. simpl. mult_tac.
 Qed.
 
-Lemma mult:  <[ 10 | base_sens | vt_end |   <{app mult $ ([1>>5][2>>5][>5]) ([1>>5][>6]) $ }> ]> ==> <[ <{ [1>>25][2>>30][>30]}> | empty nil ]>.
+Lemma mult:  <[ 10 | StringMap.NewMap (default l_false) | vt_end |   <{app mult $ ([1>>5][2>>5][>5]) ([1>>5][>6]) $ }> ]> ==> <[ <{ [1>>25][2>>30][>30]}> | empty nil ]>.
 Proof.
 mult_tac.
 Qed.
 
-Lemma wrong_mult: exists (w:nvalue), <[ 10 | base_sens | vt_end |   <{app mult $ ([1>>5][2>>5][>5]) ([1>>5][>6]) $ }> ]> ==> <[ <{ w }> | empty nil ]>.
+Lemma wrong_mult: exists (w:nvalue), <[ 10 | StringMap.NewMap (default l_false) | vt_end |   <{app mult $ ([1>>5][2>>5][>5]) ([1>>5][>6]) $ }> ]> ==> <[ <{ w }> | empty nil ]>.
 Proof.
 eexists. mult_tac.
 Qed.
 
-Lemma lit: <[ 10 | base_sens | vt_end |   <{ 5 }> ]> ==> <[ <{[>5]}> | empty nil ]>.
+Lemma lit: <[ 10 | StringMap.NewMap (default l_false) | vt_end |   <{ 5 }> ]> ==> <[ <{[>5]}> | empty nil ]>.
 Proof.
 lit_tac.
 Qed.
@@ -166,12 +165,13 @@ Proof.
 try lit_tac.
 Abort.
 
-Lemma var: <[10 | add_sens y <{[>5]}> (add_sens x <{[>6]}> base_sens) | vt_end | <{y}> ]> ==> <[ <{[>5]}> | empty nil  ]>.
+
+Lemma var: <[10 | StringMap.place (nvalue) y <{[>5]}> (StringMap.place nvalue x <{[>6]}> base_sens) | vt_end | <{y}> ]> ==> <[ <{[>5]}> | empty nil  ]>.
 Proof.
 var_tac.
 Qed.
 
-Lemma wrong_var: <[10 | add_sens y <{[>5]}> (add_sens y <{[>6]}> base_sens) | vt_end | <{z}> ]> ==> <[ <{[>FAIL]}> | empty nil  ]>.
+Lemma wrong_var: <[10 | StringMap.place nvalue y <{[>5]}> (StringMap.place nvalue y <{[>6]}> base_sens) | vt_end | <{z}> ]> ==> <[ <{[>FAIL]}> | empty nil  ]>.
 Proof.
 try var_tac.
 Abort.
@@ -187,12 +187,21 @@ Proof.
 try (fun_tac; mult_tac).
 Abort.
 
-Lemma sens: <[10 | add_sens s0 <{[>5]}> (add_sens s1 <{[>6]}> base_sens) | vt_end | <{sensor s0}> ]> ==> <[ <{[>5]}> | empty nil  ]>.
+Ltac sens_tac := 
+eapply A_SENS;
+try apply StringMap.fetch; try symmetry; try apply StringMap.fetch; simpl;
+w_tac.
+(* [(lazymatch goal with 
+| [|- context [l_fail]]=> fail;idtac "No sensor"
+| _ => reflexivity;w_tac
+end)|w_tac]. *)
+
+Lemma sens: <[10 | StringMap.place nvalue s0 <{[>5]}> (StringMap.place nvalue s1 <{[>6]}> base_sens) | vt_end | <{sensor s0}> ]> ==> <[ <{[>5]}> | empty nil  ]>.
 Proof.
 sens_tac.
 Qed.
 
-Lemma wrong_sens: <[10 | add_sens s0 <{[>5]}> (add_sens s1 <{[>6]}> base_sens) | vt_end | <{sensor z}> ]> ==> <[ <{[>FAIL]}> | empty nil  ]>.
+Lemma wrong_sens: <[10 | StringMap.place nvalue s0 <{[>5]}> (StringMap.place nvalue s1 <{[>6]}> base_sens) | vt_end | <{sensor z}> ]> ==> <[ <{[>FAIL]}> | empty nil  ]>.
 Proof.
 try sens_tac.
 Abort.

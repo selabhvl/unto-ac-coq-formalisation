@@ -25,6 +25,7 @@ Module Type MAPPING (K : KEY_TYPE).
   Definition MapOf (A : Type) := M.t A.
   Definition NewMap {A : Type} (def : A) := M.init def.
 
+  Parameter fetch : forall A k v (m: M.t A), lookup A k (place A k v m) = v.
 End MAPPING.
 
 
@@ -41,6 +42,8 @@ Module Mapping (K: KEY_TYPE) <: MAPPING(K).
   Definition MapOf (A : Type) := M.t A.
   Definition NewMap {A : Type} (def : A) := M.init def.
 
+  Lemma fetch : forall A k v (m: M.t A), lookup k (place k v m) = v.
+  Proof. intros. apply M.gss. Qed.
 End Mapping.
 
 

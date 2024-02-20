@@ -54,9 +54,10 @@ Module NetworkSemantics (M : MAPPING).
   (*A s_net is a function that maps a event to a sensor_state*)
   Definition s_net := event -> sensor_state.
   (*The returned value if a searched event doesn't exists*)
-  Definition base_s (e:event) := default l_fail. (* base_sens.  <- Original one left as comment during refactoring *)
+  Definition base_s (e:event) : sensor_state := BS.StringMap.NewMap (default l_fail). (* base_sens.  <- Original one left as comment during refactoring *)
   (*Add a event to a s_net, with respective sensor_state*)
-  Definition add_s (new_e:event) (new_s:sensor_state) (old:s_net): s_net :=(fun e => if (equalsEv e new_e) then new_s else (old e)).
+  Definition add_s (new_e:event) (new_s:sensor_state) (old:s_net): s_net :=
+    (fun e => if (equalsEv e new_e) then new_s else (old e)).
 
 
   (*The augmented event structure, like defined in the papers*)
