@@ -26,6 +26,11 @@ Module Type MAPPING (K : KEY_TYPE).
   Definition NewMap {A : Type} (def : A) := M.init def.
 
   Parameter fetch : forall A k v (m: M.t A), lookup A k (place A k v m) = v.
+
+  (* Software fundations notations *)
+  Notation "'_' '!->' v" := (NewMap _ v) (at level 100, right associativity).
+  Notation "k '!->' v ';' m" := (place _ k v m) (at level 100, v at next level, right associativity).
+  Notation "m '<-!' k" := (lookup _ k m) (at level 100, right associativity).
 End MAPPING.
 
 

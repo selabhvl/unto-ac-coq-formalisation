@@ -23,6 +23,7 @@ Require Import Maps.
 Require Import mapping.
 Module M := Mapping(StringKey).
 Module Import NS := NetworkSemantics(Mapping).
+Include M.
 (** Event list*)
 Definition eventList: E_net := (e 0 2) :: (e 1 2) :: (e 2 2) :: (e 0 1) :: (e 1 1) :: (e 2 1) ::  (e 0 0) :: (e 1 0) :: (e 2 0) :: nil.
 
@@ -38,13 +39,13 @@ Definition deviceMap (e:event): nat :=  match e with | (e id n) => id end.
 (** Sensors state of the net for each event*)
 Definition sensorMap (ev:event): sensor_state :=
   match ev with 
-  | e 1 0 => M.place f1 <{[>true]}> (M.place f2 <{[>false]}> (M.NewMap (default l_false)))(* add_sens f1 <{[>true]}> (add_sens f2 <{[>false]}> base_sens)*)
-  | e 2 0 => M.place f1 <{[>false]}> (M.place f2 <{[>true]}> (M.NewMap (default l_false)))(* add_sens f1 <{[>false]}> (add_sens f2 <{[>true]}> base_sens)*)
-  | e 1 1 => M.place f1 <{[>true]}> (M.place f2 <{[>false]}> (M.NewMap (default l_false)))(* add_sens f1 <{[>true]}> (add_sens f2 <{[>false]}> base_sens)*)
-  | e 1 _ => M.place f1 <{[>false]}> (M.place f2 <{[>true]}> (M.NewMap (default l_false))) (*add_sens f1 <{[>false]}> (add_sens f2 <{[>false]}> base_sens)*)
-  | e _ _ => M.place f1 <{[>true]}> (M.place f2 <{[>false]}> (M.NewMap (default l_false)))(* add_sens f1 <{[>true]}> (add_sens f2 <{[>false]}> base_sens)*)
+  | e 1 0 => f1 !-> <{[>true]}> ; (f2 !-> <{[>false]}> ; (NewMap (default l_false)))(* add_sens f1 <{[>true]}> (add_sens f2 <{[>false]}> base_sens)*)
+  | e 2 0 => f1 !-> <{[>false]}> ; (f2 !-> <{[>true]}> ; (NewMap (default l_false)))(* add_sens f1 <{[>false]}> (add_sens f2 <{[>true]}> base_sens)*)
+  | e 1 1 => f1 !-> <{[>true]}> ; (f2 !-> <{[>false]}> ; (NewMap (default l_false)))(* add_sens f1 <{[>true]}> (add_sens f2 <{[>false]}> base_sens)*)
+  | e 1 _ => f1 !-> <{[>false]}> ; (f2 !-> <{[>true]}> ; (NewMap (default l_false))) (*add_sens f1 <{[>false]}> (add_sens f2 <{[>false]}> base_sens)*)
+  | e _ _ => f1 !-> <{[>true]}> ; (f2 !-> <{[>false]}> ; (NewMap (default l_false)))(* add_sens f1 <{[>true]}> (add_sens f2 <{[>false]}> base_sens)*)
   end.
-
+  
 (*Expression equivalent to formula*)
 Definition exp_main: exp := 
 <{app exchange $(false) (fun fun_ex[old] {app b_or $(sensor f2) (app b_and $(sensor f1) (app nfold $ (b_or) (old) (old)$)$ )$ }) $ }> .
@@ -95,7 +96,7 @@ match f with
                     | nil => false
                     end) oldSTV) then net_w_el ev <{[>true]}> else net_w_el ev <{[>false]}> )
                  else net_w_el ev <{[>false]}>
-| Sensor s => net_w_el ev (M.lookup s (es_s ev))
+| Sensor s => net_w_el ev ((es_s ev) <-! s)
 end.  
 
 Fixpoint aes_formula (f:Formula) (es_E:E_net) (es_R:R_net) (es_d:d_net) (es_s:s_net) : STV :=
@@ -110,9 +111,8 @@ netI (aes eventList messageList deviceMap sensorMap) <{exp_main}> |=> netO stv v
 Proof.
 eexists. eexists. split.  
 - simpl. auto.
-- Admitted. 
-(* net_tac.
-Qed. *)
+net_tac.
+Qed.
  
 
 

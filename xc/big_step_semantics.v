@@ -49,6 +49,7 @@ Module BigStepSemantics (Map : MAPPING).
   | _ , _ => l_fail
   end.
 
+  Include StringMap.
   (** Single device semantics*)
   Reserved Notation "t '==>' t'" (at level 40).
   Inductive bigstep : conf_in -> conf_out -> Prop :=
@@ -61,7 +62,7 @@ Module BigStepSemantics (Map : MAPPING).
 
     | E_VAR : forall (id:ident) (sigma:sensor_state) (env:value_tree_env)
               (w:nvalue) x,
-              w=(lookup nvalue x sigma) ->
+              w=(sigma <-! x) ->
               w_value w ->
               <[ id | sigma | env | <{x}> ]>  ==>  <[ <{w}> | empty nil ]> 
 
@@ -125,7 +126,7 @@ Module BigStepSemantics (Map : MAPPING).
 
     | A_SENS : forall (id:ident) (sigma:sensor_state) (env:value_tree_env)
               (w:nvalue) s, 
-              w=(lookup nvalue s sigma) -> 
+              w=(sigma <-! s) -> 
               w_value w -> <[ id | sigma | env | <{sensor s}> ]>  ==>  <[ <{w}> | empty nil ]> 
 
     | A_SELF :  forall (id:ident) (sigma:sensor_state) (env:value_tree_env) (w:nvalue) (l:literal),
