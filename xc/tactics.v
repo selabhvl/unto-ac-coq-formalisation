@@ -88,17 +88,9 @@ Ltac exchange_tac := eapply A_EXCHANGE; [w_tac|w_tac|simpl|try w_tac].
 
 Ltac device_tac :=
 repeat (
-first [
-simpl;auto;
-(match goal with 
-| [|- w_value ?X] =>idtac "W_TAC"; w_tac
-| [|- value ?X] => idtac "VALUE";unfold value; simpl; repeat split; auto
-| [|- is_fun ?X] => idtac "FUNC"; apply func + apply built
-| [|- bigstep (Input ?id ?s ?v_env (exp_nvalue ?w)) (Output (exp_nvalue ?w) (empty nil) )] => idtac "GOP"
-| _ => fail
-end
-)
-| eapply A_MULT;idtac "MULT"
+  simpl;auto;
+first [ 
+  eapply A_MULT;idtac "MULT"
 
 | eapply A_UID;idtac "UID"
 | eapply A_FOLD;idtac "FOLD"
@@ -120,7 +112,15 @@ end
 | eapply E_VAL;idtac "VAL"
 
 | eapply A_SELF;idtac "SELF"
-
+|
+(match goal with 
+| [|- w_value ?X] =>idtac "W_TAC"; w_tac
+| [|- value ?X] => idtac "VALUE";unfold value; simpl; repeat split; auto
+| [|- is_fun ?X] => idtac "FUNC"; apply func + apply built
+| [|- bigstep (Input ?id ?s ?v_env (exp_nvalue ?w)) (Output (exp_nvalue ?w) (empty nil) )] => idtac "GOP"
+| _ => fail
+end
+)
 ]).
 
 Ltac net_tac :=
