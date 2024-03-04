@@ -10,18 +10,13 @@ Require Import Bool.
 Require Import String.
 Require Import List.
 Require Import PeanoNat.
+Require Import event.
 
+Module NetworkSemantics (Map : MAPPING).
 
-Module NetworkSemantics (M : MAPPING).
-
-  Module Import BS := BigStepSemantics(M).
+  Module Import EventMap := Map(EventKey).
+  Module Import BS := BigStepSemantics(Map).
   Include BS.
-
-  (*Inductive definition of type event*)
-  Inductive event := e : ident -> nat -> event.
-
-  (*A list of events*)
-  Definition E_net := list event.
 
   (*Event equality function*)
   Definition equalsEv (e0:event) (e1:event) := 
@@ -45,19 +40,23 @@ Module NetworkSemantics (M : MAPPING).
   end. 
 
   (*A d_net is a function that maps a event to a device*)
-  Definition d_net := event -> ident.
+  (* Definition d_net := event -> ident. *)
   (*The returned value if a searched event doesn't exists*)
-  Definition base_d (e:event) := 0.
+  (* Definition base_d (e:event) := 0. *)
   (*Add a event to a d_net, with respective device id*)
-  Definition add_d (new_e:event) (new_d:ident) (old:d_net): d_net :=(fun e => if (equalsEv e new_e) then new_d else (old e)).
+  (* Definition add_d (new_e:event) (new_d:ident) (old:d_net): d_net :=(fun e => if (equalsEv e new_e) then new_d else (old e)). *)
+  Definition d_net := EventMap.MapOf ident.
+  Definition base_d := EventMap.NewMap 0.
 
   (*A s_net is a function that maps a event to a sensor_state*)
-  Definition s_net := event -> sensor_state.
+  (* Definition s_net := event -> sensor_state. *)
   (*The returned value if a searched event doesn't exists*)
-  Definition base_s (e:event) : sensor_state := BS.StringMap.NewMap (default l_fail). (* base_sens.  <- Original one left as comment during refactoring *)
+  (*Definition base_s (e:event) : sensor_state := BS.StringMap.NewMap (default l_fail). *)(*base_sens.  <- Original one left as comment during refactoring *)
   (*Add a event to a s_net, with respective sensor_state*)
-  Definition add_s (new_e:event) (new_s:sensor_state) (old:s_net): s_net :=
-    (fun e => if (equalsEv e new_e) then new_s else (old e)).
+  (* Definition add_s (new_e:event) (new_s:sensor_state) (old:s_net): s_net :=
+    (fun e => if (equalsEv e new_e) then new_s else (old e)). *)
+  Definition s_net := EventMap.MapOf sensor_state.
+  Definition base_s := EventMap.NewMap (BS.StringMap.NewMap (default l_fail)).
 
 
   (*The augmented event structure, like defined in the papers*)
@@ -78,7 +77,7 @@ Module NetworkSemantics (M : MAPPING).
   *)
   Fixpoint before_event (b_e:event) (b_E:E_net) (b_R:R_net) (b_vts:vt_net) (b_d:d_net): value_tree_env := 
   match (b_E,b_vts) with 
-  | (cons el0 next,cons (net_vt_el el1 vt) next_vt) => if ((containsR (forward el0 b_e) b_R) && (equalsEv el0 el1) ) then vt_el (b_d el0) (vt) (before_event b_e next b_R next_vt b_d) 
+  | (cons el0 next,cons (net_vt_el el1 vt) next_vt) => if ((containsR (forward el0 b_e) b_R) && (equalsEv el0 el1) ) then vt_el (EventMap.lookup ident el0 b_d) (vt) (before_event b_e next b_R next_vt b_d) 
   else (before_event b_e next b_R next_vt b_d)
   | (nil,nil) => vt_end
   | _ => vt_end
@@ -92,7 +91,7 @@ Module NetworkSemantics (M : MAPPING).
   | (cons el0 next,cons (net_vt_el el1 vt) next_vt) => 
     if (equalsEv el0 el1) then 
         (let x:=before_event_option b_e next b_R next_vt b_d in 
-        if (containsR (forward el0 b_e) b_R) then (option_map (add_vts_el (b_d el0) vt) x) else (x)
+        if (containsR (forward el0 b_e) b_R) then (option_map (add_vts_el (EventMap.lookup ident el0 b_d) vt) x) else (x)
         )
     else None
   | (nil,nil) => Some vt_end
@@ -120,7 +119,7 @@ Module NetworkSemantics (M : MAPPING).
 
   -> vt_env = before_event ev next n_R next_vts n_d 
 
-  -> <[ n_d ev | n_s ev | vt_env | e_main ]> ==> <[ w |  vt ]> 
+  -> <[ EventMap.lookup ident ev n_d | EventMap.lookup sensor_state ev n_s  | vt_env | e_main ]> ==> <[ w |  vt ]> 
 
   -> netI (aes (cons ev next) n_R n_d n_s) e_main |=> netO (cons (net_w_el ev w) next_stv)  (cons (net_vt_el ev vt) next_vts) 
 
